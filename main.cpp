@@ -38,7 +38,7 @@ int** slice(int size, int row, int col, int** mat, int rows, int cols)
     {
         for ( int w=0; w<size; w++ )
         {   
-            res[h][w] = mat[row+h-1][col+w-1];
+            res[h][w] = mat[(row+h+rows-1)%rows][(col+w+cols-1)%cols];
         }
     }
     return res;
@@ -165,9 +165,5 @@ int main()
     for (int i=0; i<numberOfCols; i++) resultArray[i] = new int[numberOfCols];
     // apply_convolution(valueArray, resultArray, edgeDetection, numberOfRows, numberOfCols);
     // write_to_image(resultArray, numberOfRows, numberOfCols, maxGrayVal);
-    int s=3;
-    int** testArray;
-    testArray = slice(s,s,s,valueArray,numberOfRows,numberOfCols);
-    display_array(testArray,s,s);
     return 0;
 }
