@@ -5,7 +5,7 @@
 
 void display_array(int **array, int& rows, int& cols)
 {
-    for ( int i=0; i<rows; i++ )
+    for ( int i=rows-1; i>=0; i-- )
     {
         for ( int j=0; j<cols; j++ )
         {
@@ -19,14 +19,13 @@ int multiply(int **a, int **b)
 {   
     int result=0;
     for (int i=0; i<3; i++)
-    {
-        int k=2;
-        for(int j=0; j<3; j++)
         {
-            result = result + b[i][j]*a[i][k];
-            k = k-1;
+            for(int j=0; j<3; j++)
+            {
+                result=a[i][j]*1;
+                // result = 255;
+            }
         }
-    }
     return result;
 }
 
@@ -34,26 +33,17 @@ int** slice(int size, int row, int col, int** mat, int rows, int cols)
 {   
     int** res;
     res = new int*[size];
-    for (int h=0; h<size; h++) 
+    for ( int h=0; h<size; h++ ) res[h] = new int[size];
+    for ( int h=0; h<size; h++ )
     {
-        res[h] = new int[size];
-        for( int w=0; w<size; w++)
-        {
-            if ( (row%rows==0) || (col%cols==0) || ((row+1)%rows==0) || ((col+1)%cols==0) )
-            {
-                res[h][w] = 0;
-            }
-            else
-            {
-                res[h][w] = mat[row-1][col-1];
-                col++;
-            }
+        for ( int w=0; w<size; w++ )
+        {   
+            res[h][w] = mat[row+h-1][col+w-1];
         }
-        if (!( (row%rows==0) || (col%cols==0) || ((row+1)%rows==0) || ((col+1)%cols==0) )) row++;
-        
     }
     return res;
 }
+
 void get_file_stats(std::ifstream& inputFile, int& numberOfRows, int& numberOfCols, int& maxGrayVal, std::stringstream& strStream)
 {
     std::string line;
@@ -69,10 +59,10 @@ void get_file_stats(std::ifstream& inputFile, int& numberOfRows, int& numberOfCo
 
 void set_value_array(int **array, int& rows, int& columns, std::stringstream& strStream)
 {
-    int row, col;
-    for ( row = 0; row < rows; ++row )
-        for( col = 0; col < columns; ++col)
-            strStream >> array[row][col];
+    int h,w;
+    for ( h=7; h>=0; h-- )
+        for( w=0;  w<columns; w++ )
+            strStream >> array[h][w];
     std::cout << "Conversion of values to array complete. \n";
 }
 
@@ -132,9 +122,10 @@ void apply_convolution( int **valueArray,
     std::cout << "Applying convolution kernel... \n";
     for (int row=0; row<rows; row++)
         for(int col=0; col<cols; col++)
-        {
+        {   
+            resultArray[row][col]=0;
             int **slicedArray = slice(s,row,col,valueArray,rows,cols);
-            resultArray[row][col] = multiply(slicedArray,operation);
+            resultArray[row][col] = multiply(slicedArray,operation);  
         }
     std::cout << "Application complete. \n";
 }
@@ -153,7 +144,7 @@ int main()
     valueArray = new int *[numberOfRows];
     for (int i=0; i<numberOfCols; i++) valueArray[i] = new int[numberOfCols];
     set_value_array(valueArray, numberOfRows, numberOfRows, strStream);
-    
+
     int size = 3; 
     int **edgeDetection, **sharpen;
     int **gaussianBlur;
@@ -172,8 +163,11 @@ int main()
     int **resultArray;
     resultArray = new int *[numberOfRows];
     for (int i=0; i<numberOfCols; i++) resultArray[i] = new int[numberOfCols];
-    apply_convolution(valueArray, resultArray, edgeDetection, numberOfRows, numberOfCols);
-
-    write_to_image(resultArray, numberOfRows, numberOfCols, maxGrayVal);
+    // apply_convolution(valueArray, resultArray, edgeDetection, numberOfRows, numberOfCols);
+    // write_to_image(resultArray, numberOfRows, numberOfCols, maxGrayVal);
+    int s=3;
+    int** testArray;
+    testArray = slice(s,s,s,valueArray,numberOfRows,numberOfCols);
+    display_array(testArray,s,s);
     return 0;
 }
