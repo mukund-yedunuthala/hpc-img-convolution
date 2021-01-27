@@ -2,6 +2,58 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+
+void display_array(int **array, int& rows, int& cols)
+{
+    for ( int i=0; i<rows; i++ )
+    {
+        for ( int j=0; j<cols; j++ )
+        {
+            std::cout << array[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
+int multiply(int **a, int **b) 
+{   
+    int result=0;
+    for (int i=0; i<3; i++)
+    {
+        int k=2;
+        for(int j=0; j<3; j++)
+        {
+            result = result + b[i][j]*a[i][k];
+            k = k-1;
+        }
+    }
+    return result;
+}
+
+int** slice(int size, int row, int col, int** mat, int rows, int cols)
+{   
+    int** res;
+    res = new int*[size];
+    for (int h=0; h<size; h++) 
+    {
+        res[h] = new int[size];
+        for( int w=0; w<size; w++)
+        {
+            if ( (row%rows==0) || (col%cols==0) || ((row+1)%rows==0) || ((col+1)%cols==0) )
+            {
+                res[h][w] = 0;
+            }
+            else
+            {
+                res[h][w] = mat[row-1][col-1];
+                col++;
+            }
+        }
+        if (!( (row%rows==0) || (col%cols==0) || ((row+1)%rows==0) || ((col+1)%cols==0) )) row++;
+        
+    }
+    return res;
+}
 void get_file_stats(std::ifstream& inputFile, int& numberOfRows, int& numberOfCols, int& maxGrayVal, std::stringstream& strStream)
 {
     std::string line;
@@ -24,20 +76,9 @@ void set_value_array(int **array, int& rows, int& columns, std::stringstream& st
     std::cout << "Conversion of values to array complete. \n";
 }
 
-void display_array(int **array, int& rows, int& cols)
-{
-    for ( int i=0; i<rows; i++ )
-    {
-        for ( int j=0; j<cols; j++ )
-        {
-            std::cout << array[i][j] << " ";
-        }
-        std::cout << std::endl;
-    }
-}
-
 void write_to_image(int **array, int& rows, int& cols, int& greyvalue)
 {
+    std::cout << "Writing resultant array to image in PGM format... \n";
     std::ofstream outputFile("result.pgm");
     outputFile << "P2\n" << rows << " " << cols << "\n";
     outputFile << greyvalue << "\n";
@@ -53,7 +94,7 @@ void write_to_image(int **array, int& rows, int& cols, int& greyvalue)
     outputFile.close();
 }
 
-void set_kernels(int **edgeDetection, int **sharpen, double **gaussianBlur, int& s)
+void set_kernels(int **edgeDetection, int **sharpen, int **gaussianBlur, int& s)
 {
     for ( int i=0; i<3; i++)
     {
@@ -62,17 +103,17 @@ void set_kernels(int **edgeDetection, int **sharpen, double **gaussianBlur, int&
             edgeDetection[i][j] = -1;
             if((i+j)%2!=0)
             {
-                gaussianBlur[i][j] = 0.0625*2;
+                gaussianBlur[i][j] = 2;
                 sharpen[i][j] = -1;
             }
             else
             {
-                gaussianBlur[i][j] = 0.0625*1;
+                gaussianBlur[i][j] = 1;
                 sharpen[i][j] = 0;
             }
             if (i==1&&j==1)
             {
-                gaussianBlur[i][j] = 0.0625*4;
+                gaussianBlur[i][j] = 4;
                 sharpen[i][j] = 5;
                 edgeDetection[i][j] = 8;
             }
@@ -80,6 +121,24 @@ void set_kernels(int **edgeDetection, int **sharpen, double **gaussianBlur, int&
     }
     std::cout << "Kernel matrices set. \n";
 }
+
+void apply_convolution( int **valueArray, 
+                        int **resultArray, 
+                        int **operation,
+                        int& rows,
+                        int& cols)
+{
+    int s=3;
+    std::cout << "Applying convolution kernel... \n";
+    for (int row=0; row<rows; row++)
+        for(int col=0; col<cols; col++)
+        {
+            int **slicedArray = slice(s,row,col,valueArray,rows,cols);
+            resultArray[row][col] = multiply(slicedArray,operation);
+        }
+    std::cout << "Application complete. \n";
+}
+
 int main()
 {
     int numberOfRows, numberOfCols, maxGrayVal;
@@ -97,18 +156,24 @@ int main()
     
     int size = 3; 
     int **edgeDetection, **sharpen;
-    double **gaussianBlur;
+    int **gaussianBlur;
     edgeDetection = new int *[size];
     sharpen = new int *[size];
-    gaussianBlur = new double *[size];
+    gaussianBlur = new int *[size];
     for(int j=0; j<size; j++)
     {
         edgeDetection[j] = new int[size];
         sharpen[j] = new int[size];
-        gaussianBlur[j] = new double[size];
+        gaussianBlur[j] = new int[size];
     }
     printf("Updating kernel arrays... \n");
     set_kernels(edgeDetection, sharpen, gaussianBlur, size);
-    // write_to_image(valueArray, numberOfRows, numberOfCols, maxGrayVal);
+
+    int **resultArray;
+    resultArray = new int *[numberOfRows];
+    for (int i=0; i<numberOfCols; i++) resultArray[i] = new int[numberOfCols];
+    apply_convolution(valueArray, resultArray, edgeDetection, numberOfRows, numberOfCols);
+
+    write_to_image(resultArray, numberOfRows, numberOfCols, maxGrayVal);
     return 0;
 }
