@@ -22,20 +22,19 @@ void get_file_data(std::ifstream& inputFile, int& numberOfRows, int& numberOfCol
     std::cout << "Version of PGM Image: " << line << "\n";
     strStream << inputFile.rdbuf();
     strStream >> numberOfCols >> numberOfRows >> maxGrayVal;
-    numberOfCols+=2; numberOfRows+=2;
     std::cout << "Rows present: " << numberOfRows-2;
     std::cout <<  " Columns present: " << numberOfCols-2 << "\n";
     std::cout << "ASCII decimal for maximum gray value: " << maxGrayVal << "\n";
     std::cout << "Reading image successful. \n"; 
 }
 
-void set_value_array(unsigned int **array, int& rows, int& columns, std::stringstream& strStream)
+void set_value_array(int **array, int& rows, int& columns, std::stringstream& strStream, int& pad)
 {
     int h,w;
     for ( h=0; h<rows; h++ )
         for( w=0;  w<columns; w++ )
         {
-            if(h<(rows-2)&&w<(columns-2))
+            if(h<(rows-pad)&&w<(columns-pad))
                 strStream >> array[h][w];
             else
                 array[h][w] = 127;         
@@ -43,15 +42,15 @@ void set_value_array(unsigned int **array, int& rows, int& columns, std::strings
     std::cout << "Conversion of values to array complete. \n";
 }
 
-void write_to_image(unsigned int **array, int& rows, int& cols, int& greyvalue)
+void write_to_image(int **array, int& rows, int& cols, int& greyvalue, int& pad)
 {
     std::cout << "Writing resultant array to image in PGM format... \n";
-    std::ofstream outputFile("result-final.pgm");
-    outputFile << "P2\n" << rows-2 << " " << cols-2 << "\n";
+    std::ofstream outputFile("result.pgm");
+    outputFile << "P2\n" << rows-pad << " " << cols-pad << "\n";
     outputFile << greyvalue << "\n";
-    for ( int i=0; i<rows-2; i++ )
+    for ( int i=0; i<rows-pad; i++ )
     {
-        for ( int j=0; j<cols-2; j++ )
+        for ( int j=0; j<cols-pad; j++ )
         {
             outputFile << array[i][j] << " ";
         }
@@ -89,8 +88,7 @@ void set_kernels(int **edgeDetection, int **sharpen, int **gaussianBlur, int& s)
     std::cout << "Kernel matrices set. \n";
 }
 
-void apply_convolution( unsigned int **valueArray, 
-                        unsigned int **resultArray, 
+void apply_convolution( int **valueArray, 
                         int **operation,
                         int& rows,
                         int& cols)
@@ -100,7 +98,7 @@ void apply_convolution( unsigned int **valueArray,
     {
         for(int y=0; y<cols; y++)
         {
-            unsigned int acc = 0;
+            int acc = 0;
             for(int i=0; i<s; i++)
             {
                 for(int j=0; j<s; j++)
@@ -108,14 +106,20 @@ void apply_convolution( unsigned int **valueArray,
                     acc+= valueArray[(x-i+2)%rows][(y-j+2)%cols]*operation[i][j];
                 }
             }
-            valueArray[x][y] = acc;
+            if (acc>=0 && acc<=255)
+                valueArray[x][y] = acc;
+
+            else if (acc<0)
+                valueArray[x][y] = 0;
+            
+            else
+                valueArray[x][y] = 255;
         }
     }
     std::cout<<"Convolution application complete. \n";
 }
 
-void apply_gaussian_blur(   unsigned int **valueArray, 
-                            unsigned int **resultArray, 
+void apply_gaussian_blur(   int **valueArray, 
                             int **operation,
                             int& rows,
                             int& cols,
@@ -136,7 +140,16 @@ void apply_gaussian_blur(   unsigned int **valueArray,
                     acc+= 0.0625*valueArray[(x-i+2)%rows][(y-j+2)%cols]*operation[i][j];
                 }
             }
-            valueArray[x][y] = acc;
+
+            if (acc>=0 && acc<=255)
+                valueArray[x][y] = acc;
+
+            else if (acc<0)
+                valueArray[x][y] = 0;
+            
+            else
+                valueArray[x][y] = 255;
+            
         }
     }
     instances--;
@@ -151,12 +164,14 @@ int main()
     fileName = "512.pgm";
     std::ifstream inputFile(fileName);
     get_file_data(inputFile, numberOfRows, numberOfCols, maxGrayVal, strStream);
+    int pad = 10;
+    numberOfCols+=pad; numberOfRows+=pad;
     inputFile.close();
 
-    unsigned int **valueArray;
-    valueArray = new unsigned int *[numberOfRows];
-    for (int i=0; i<numberOfCols; i++) valueArray[i] = new unsigned int[numberOfCols];
-    set_value_array(valueArray, numberOfRows, numberOfRows, strStream);
+    int **valueArray;
+    valueArray = new int *[numberOfRows];
+    for (int i=0; i<numberOfCols; i++) valueArray[i] = new int[numberOfCols];
+    set_value_array(valueArray, numberOfRows, numberOfRows, strStream, pad);
 
     int size = 3; 
     int **edgeDetection, **sharpen;
@@ -173,21 +188,16 @@ int main()
     printf("Updating kernel arrays... \n");
     set_kernels(edgeDetection, sharpen, gaussianBlur, size);
 
-    unsigned int **resultArray;
-    resultArray = new unsigned int *[numberOfRows];
-    for (int i=0; i<numberOfCols; i++) resultArray[i] = new unsigned int[numberOfCols];
-    // apply_gaussian_blur(valueArray,resultArray,gaussianBlur,numberOfRows,numberOfCols,5);
-    // apply_convolution(valueArray, resultArray, sharpen, numberOfRows, numberOfCols);
-    apply_convolution(valueArray, resultArray, edgeDetection, numberOfRows, numberOfCols);
-    write_to_image(valueArray, numberOfRows, numberOfCols, maxGrayVal);
+    apply_gaussian_blur(valueArray, gaussianBlur,numberOfRows,numberOfCols,5);
+    apply_convolution(valueArray, sharpen, numberOfRows, numberOfCols);
+    apply_convolution(valueArray, edgeDetection, numberOfRows, numberOfCols);
+    write_to_image(valueArray, numberOfRows, numberOfCols, maxGrayVal, pad);
 
     for(int row = 0; row < numberOfRows; row++)
     {
         delete[] valueArray[row];
-		delete[] resultArray[row];
-	}
+    }
 	delete[] valueArray;
-	delete[] resultArray;
     for(int k=0; k<size; k++)
     {
         delete[] edgeDetection[k];
