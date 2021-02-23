@@ -2,7 +2,7 @@
 *.pdf
 *.jpg
 *.out
-
+test-mpi-scatterv.cpp
 # latex 
 ## Core latex/pdflatex auxiliary files:
 *.aux

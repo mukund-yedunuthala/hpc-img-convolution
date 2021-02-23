@@ -1,0 +1,8 @@
+Image convolution using MPI
+High Performance Computing and Optimization | WS2020-21
+Technische Universitaet Bergakademie Freiberg
+
+
+Version of PGM Image: P2
+Rows present: 512 Columns present: 512
+Maximum gray value: 255

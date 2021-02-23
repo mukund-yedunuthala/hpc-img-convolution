@@ -2,7 +2,6 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-
 void get_file_data(std::ifstream& inputFile, int& numberOfRows, int& numberOfCols, int& maxGrayVal, std::stringstream& strStream)
 {
     std::string line;
@@ -13,7 +12,6 @@ void get_file_data(std::ifstream& inputFile, int& numberOfRows, int& numberOfCol
     std::cout << "Rows present: " << numberOfRows;
     std::cout <<  " Columns present: " << numberOfCols << "\n";
     std::cout << "Maximum gray value: " << maxGrayVal << "\n";
-    std::cout << "Reading image successful. \n"; 
 }
 
 void set_value_array(int **array, int& rows, int& columns, std::stringstream& strStream)
@@ -27,7 +25,6 @@ void set_value_array(int **array, int& rows, int& columns, std::stringstream& st
             else
                 array[h][w] = 0;         
         }
-    std::cout << "Conversion of values to array complete. \n";
 }
 
 void set_result_array(int **array, int& rows, int& cols)
@@ -44,7 +41,6 @@ void set_result_array(int **array, int& rows, int& cols)
 
 void write_to_image(int **array, int& rows, int& cols, int& greyvalue, std::string& fileName)
 {
-    std::cout << "Writing resultant array to image in PGM format... \n";
     std::ofstream outputFile(fileName);
     outputFile << "P2\n" << rows << " " << cols << "\n";
     outputFile << greyvalue << "\n";
@@ -56,7 +52,6 @@ void write_to_image(int **array, int& rows, int& cols, int& greyvalue, std::stri
         }
         outputFile << "\n";
     }
-    std::cout << "Creation of resultant image complete. \n";
     outputFile.close();
 }
 
@@ -86,7 +81,6 @@ void set_kernels(int **edgeDetection, int **sharpen, double **gaussianBlur, int&
             }
         }
     }
-    std::cout << "Kernel matrices set. \n";
 }
 
 template <typename kernel>
@@ -123,43 +117,43 @@ void apply_convolution( int **valueArray,
 
 int main()
 {
-    int numberOfRows = 0, numberOfCols = 0, maxGrayVal = 0, blurInstances = 5;
-    std::string fileName;
+
+    std::cout << "Image convolution using MPI\n";
+    std::cout << "High Performance Computing and Optimization | WS2020-21\n";
+    std::cout << "Technische Universitaet Bergakademie Freiberg\n\n\n";
+    int numberOfRows = 0, numberOfCols = 0, maxGrayVal = 0, blurInstances = 5, matSize = 3;
+    std::string fileName, opFile;
     std::stringstream strStream;
     fileName = "512.pgm";
     std::ifstream inputFile(fileName);
     get_file_data(inputFile, numberOfRows, numberOfCols, maxGrayVal, strStream);
-
-    int **valueArray;
-    valueArray = new int *[numberOfRows];    
-    for (int i=0; i<numberOfCols; i++)
-        valueArray[i] = new int[numberOfCols];
-    set_value_array(valueArray, numberOfRows, numberOfRows, strStream);
-    
-    int **resultArray;
+    int **valueArray, **resultArray;
+    valueArray = new int *[numberOfRows];
     resultArray = new int *[numberOfRows];    
     for (int i=0; i<numberOfCols; i++)
+    {
+        valueArray[i] = new int[numberOfCols];
         resultArray[i] = new int[numberOfCols];
+    }
+    set_value_array(valueArray, numberOfRows, numberOfRows, strStream);
     set_result_array(resultArray, numberOfRows, numberOfCols);
 
-    int size = 3; 
     int **edgeDetection, **sharpen;
     double **gaussianBlur;
-    edgeDetection = new int *[size];
-    sharpen = new int *[size];
-    gaussianBlur = new double *[size];
-    for(int j=0; j<size; j++)
+    edgeDetection = new int *[matSize];
+    sharpen = new int *[matSize];
+    gaussianBlur = new double *[matSize];
+    for(int j=0; j<matSize; j++)
     {
-        edgeDetection[j] = new int[size];
-        sharpen[j] = new int[size];
-        gaussianBlur[j] = new double[size];
+        edgeDetection[j] = new int[matSize];
+        sharpen[j] = new int[matSize];
+        gaussianBlur[j] = new double[matSize];
     }
-    printf("Updating kernel arrays... \n");
-    set_kernels(edgeDetection, sharpen, gaussianBlur, size);
+    set_kernels(edgeDetection, sharpen, gaussianBlur, matSize);
 
     apply_convolution<int>(valueArray, resultArray, edgeDetection, numberOfRows, numberOfCols);
-    fileName = "result01-edgedetection.pgm";
-    write_to_image(resultArray, numberOfRows, numberOfCols, maxGrayVal, fileName);
+    opFile = "result01-edgedetection-" + fileName;
+    write_to_image(resultArray, numberOfRows, numberOfCols, maxGrayVal, opFile);
 
     set_result_array(resultArray, numberOfRows, numberOfCols);
     int index = blurInstances;
@@ -172,8 +166,8 @@ int main()
         
         index--;
     }
-    fileName = "result02-blur.pgm";
-    write_to_image(resultArray, numberOfRows, numberOfCols, maxGrayVal, fileName);
+    opFile = "result02-blur-" + fileName;
+    write_to_image(resultArray, numberOfRows, numberOfCols, maxGrayVal, opFile);
 
     set_result_array(resultArray, numberOfRows, numberOfCols);
     index = blurInstances;
@@ -188,11 +182,8 @@ int main()
     }    
     apply_convolution<int>(resultArray, resultArray, sharpen, numberOfRows, numberOfCols);
     apply_convolution<int>(resultArray, resultArray, edgeDetection, numberOfRows, numberOfCols);
-    fileName = "result03-all.pgm";
-    write_to_image(resultArray, numberOfRows, numberOfCols, maxGrayVal, fileName);
-
-    std::cout<<"Convolution application complete. \n";
-
+    opFile = "result03-all-" + fileName;
+    write_to_image(resultArray, numberOfRows, numberOfCols, maxGrayVal, opFile);
 
     for(int row = 0; row < numberOfRows; row++)
     {
@@ -201,7 +192,7 @@ int main()
     }
 	delete[] valueArray;
     delete[] resultArray;
-    for(int k=0; k<size; k++)
+    for(int k=0; k < matSize; k++)
     {
         delete[] edgeDetection[k], gaussianBlur[k], sharpen[k];
     }
