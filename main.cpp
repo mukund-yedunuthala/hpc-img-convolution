@@ -14,32 +14,32 @@ void get_file_data(std::ifstream& inputFile, int& numberOfRows, int& numberOfCol
     std::cout << "Maximum gray value: " << maxGrayVal << "\n";
 }
 
-void set_value_array(int **array, int& rows, int& columns, std::stringstream& strStream)
+void set_value_array(int *array, int& rows, int& columns, std::stringstream& strStream)
 {
     int h,w;
     for ( h=0; h<rows; h++ )
         for( w=0;  w<columns; w++ )
         {
             if(h<(rows)&&w<(columns))
-                strStream >> array[h][w];
+                strStream >> array[(h*columns)+w];
             else
-                array[h][w] = 0;         
+                array[(h*columns)+w] = 0;         
         }
 }
 
-void set_result_array(int **array, int& rows, int& cols)
+void set_result_array(int *array, int& rows, int& cols)
 {
     int h,w;
     for ( h=0; h<rows; h++ )
     {
         for( w=0;  w<cols; w++ )
         {
-            array[h][w] = 0;         
+            array[(h*cols)+w] = 0;         
         }
     }
 }
 
-void write_to_image(int **array, int& rows, int& cols, int& greyvalue, std::string& fileName)
+void write_to_image(int *array, int& rows, int& cols, int& greyvalue, std::string& fileName)
 {
     std::ofstream outputFile(fileName);
     outputFile << "P2\n" << rows << " " << cols << "\n";
@@ -48,7 +48,7 @@ void write_to_image(int **array, int& rows, int& cols, int& greyvalue, std::stri
     {
         for ( int j=0; j<cols; j++ )
         {
-            outputFile << array[i][j] << " ";
+            outputFile << array[(i*cols)+j] << " ";
         }
         outputFile << "\n";
     }
@@ -84,8 +84,8 @@ void set_kernels(int **edgeDetection, int **sharpen, double **gaussianBlur, int&
 }
 
 template <typename kernel>
-void apply_convolution( int **valueArray,
-                        int **resultArray,
+void apply_convolution( int *valueArray,
+                        int *resultArray,
                         kernel **operation,
                         int& rows,
                         int& cols)
@@ -100,17 +100,17 @@ void apply_convolution( int **valueArray,
             {
                 for(int j=0; j<s; j++)
                 {
-                    acc+= valueArray[((x-i+2)%rows)][((y-j+2)%cols)]*operation[i][j];
+                    acc += valueArray[(((x-i+2)%rows)*cols)+((y-j+2)%cols)]*operation[i][j];
                 }
             }
             if (acc>=0 && acc<=255)
-                resultArray[x][y] = acc;
+                resultArray[(x*cols)+y] = acc;
 
             else if (acc<0)
-                resultArray[x][y] = 0;
+                resultArray[(x*cols)+y] = 0;
             
             else
-                resultArray[x][y] = 255;
+                resultArray[(x*cols)+y] = 255;
         }
     }
 }
@@ -127,14 +127,9 @@ int main()
     fileName = "512.pgm";
     std::ifstream inputFile(fileName);
     get_file_data(inputFile, numberOfRows, numberOfCols, maxGrayVal, strStream);
-    int **valueArray, **resultArray;
-    valueArray = new int *[numberOfRows];
-    resultArray = new int *[numberOfRows];    
-    for (int i=0; i<numberOfCols; i++)
-    {
-        valueArray[i] = new int[numberOfCols];
-        resultArray[i] = new int[numberOfCols];
-    }
+    int *valueArray, *resultArray;
+    valueArray = new int [numberOfRows*numberOfCols];
+    resultArray = new int [numberOfRows*numberOfCols];    
     set_value_array(valueArray, numberOfRows, numberOfRows, strStream);
     set_result_array(resultArray, numberOfRows, numberOfCols);
 
@@ -185,11 +180,6 @@ int main()
     opFile = "result03-all-" + fileName;
     write_to_image(resultArray, numberOfRows, numberOfCols, maxGrayVal, opFile);
 
-    for(int row = 0; row < numberOfRows; row++)
-    {
-        delete[] valueArray[row];
-        delete[] resultArray[row];
-    }
 	delete[] valueArray;
     delete[] resultArray;
     for(int k=0; k < matSize; k++)
