@@ -7,12 +7,8 @@ void get_file_data(std::ifstream& inputFile, int& numberOfRows, int& numberOfCol
 {
     std::string line;
     getline(inputFile,line);
-    std::cout << "Version of PGM Image: " << line << "\n";
     strStream << inputFile.rdbuf();
     strStream >> numberOfCols >> numberOfRows >> maxGrayVal;
-    std::cout << "Rows present: " << numberOfRows;
-    std::cout <<  " Columns present: " << numberOfCols << "\n";
-    std::cout << "Maximum gray value: " << maxGrayVal << "\n";
 }
 
 void set_value_array(int *array, int& rows, int& columns, std::stringstream& strStream)
@@ -125,9 +121,6 @@ int main(int argc, char** argv)
     // std::cout << "Rank = " << rank << ", Size = " << SIZE << "\n";
     MPI_Barrier(MPI_COMM_WORLD);
 
-    std::cout << "Image convolution using MPI\n";
-    std::cout << "High Performance Computing and Optimization | WS2020-21\n";
-    std::cout << "Technische Universitaet Bergakademie Freiberg\n\n\n";
     int numberOfRows = 0, numberOfCols = 0, maxGrayVal = 0, blurInstances = 5, matSize = 3;
     std::string fileName, opFile;
     std::stringstream strStream;
@@ -141,6 +134,18 @@ int main(int argc, char** argv)
     set_value_array(valueArray, numberOfRows, numberOfRows, strStream);
     set_result_array(resultArray, numberOfRows, numberOfCols);
     inputFile.close();
+    if(rank == ROOT)
+    {
+        std::cout << "Image convolution using MPI\n";
+        std::cout << "High Performance Computing and Optimization | WS2020-21\n";
+        std::cout << "Technische Universitaet Bergakademie Freiberg\n";
+        std::string separator(60,'=');
+        std::cout << separator << "\n\n";
+        std::cout << "Version of PGM Image: P2\n";
+        std::cout << "Rows present: " << numberOfRows;
+        std::cout <<  " Columns present: " << numberOfCols << "\n";
+        std::cout << "Maximum gray value: " << maxGrayVal << "\n";
+    }
 
     int **edgeDetection, **sharpen;
     double **gaussianBlur;
@@ -155,17 +160,17 @@ int main(int argc, char** argv)
     }
     set_kernels(edgeDetection, sharpen, gaussianBlur, matSize);
     
-    int buffCnt = arrSize/SIZE;
+    int rowsToSend = (numberOfRows/SIZE);
+    int buffCnt = rowsToSend*numberOfCols;
     int *recvBuff;
     recvBuff = new int[buffCnt];
     MPI_Scatter(    valueArray, buffCnt, MPI_INT,
                     recvBuff, buffCnt, MPI_INT,
                     ROOT, MPI_COMM_WORLD    );
-
+    apply_convolution<int>(recvBuff, recvBuff, edgeDetection, rowsToSend, numberOfCols);
     MPI_Gather(     recvBuff, buffCnt, MPI_INT,
                     resultArray, buffCnt, MPI_INT,
                     ROOT, MPI_COMM_WORLD    );
-
     if(rank == ROOT)
     {
         opFile = "mpitest-" + fileName;
