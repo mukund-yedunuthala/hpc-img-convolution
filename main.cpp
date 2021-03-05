@@ -124,7 +124,7 @@ int main(int argc, char** argv)
     int numberOfRows = 0, numberOfCols = 0, maxGrayVal = 0, blurInstances = 5, matSize = 3;
     std::string fileName, opFile;
     std::stringstream strStream;
-    fileName = "512.pgm";
+    fileName = "test.pgm";
     std::ifstream inputFile(fileName);
     get_file_data(inputFile, numberOfRows, numberOfCols, maxGrayVal, strStream);
     int arrSize = numberOfCols*numberOfRows;
@@ -161,58 +161,38 @@ int main(int argc, char** argv)
     set_kernels(edgeDetection, sharpen, gaussianBlur, matSize);
     
     int rowsToSend = (numberOfRows/SIZE);
-    int buffCnt = rowsToSend*numberOfCols;
-    int *recvBuff;
+    int *recvBuff, *sendCounts, *disps, *megaResArray;
+    int remRows = numberOfRows%SIZE, sum = 0;
+    int buffCnt = (rowsToSend+remRows)*numberOfCols;
     recvBuff = new int[buffCnt];
-    MPI_Scatter(    valueArray, buffCnt, MPI_INT,
-                    recvBuff, buffCnt, MPI_INT,
-                    ROOT, MPI_COMM_WORLD    );
-    apply_convolution<int>(recvBuff, recvBuff, edgeDetection, rowsToSend, numberOfCols);
-    MPI_Gather(     recvBuff, buffCnt, MPI_INT,
-                    resultArray, buffCnt, MPI_INT,
-                    ROOT, MPI_COMM_WORLD    );
-    if(rank == ROOT)
+    sendCounts = new int[SIZE];
+    disps = new int[SIZE];
+    for(int r = 0; r < SIZE; r++)
     {
-        opFile = "mpitest-" + fileName;
-        write_to_image(resultArray, numberOfRows, numberOfCols, maxGrayVal, opFile);
+        sendCounts[r] = buffCnt;
+        if(r==SIZE-1)
+        {
+            sendCounts[r] += remRows * numberOfCols;
+        }
+        disps[r] = sum;
+        sum += sendCounts[r];
     }
-    /*
-    apply_convolution<int>(valueArray, resultArray, edgeDetection, numberOfRows, numberOfCols);
-    opFile = "result01-edgedetection-" + fileName;
-    write_to_image(resultArray, numberOfRows, numberOfCols, maxGrayVal, opFile);
+    MPI_Scatterv(valueArray, sendCounts, disps, MPI_INT, recvBuff, buffCnt, MPI_INT, ROOT, MPI_COMM_WORLD);
 
-    set_result_array(resultArray, numberOfRows, numberOfCols);
-    int index = blurInstances;
-    while (index > 0)
-    {
-        if (blurInstances == index)
-            apply_convolution<double>(valueArray, resultArray, gaussianBlur, numberOfRows, numberOfCols);
-        else
-            apply_convolution<double>(resultArray, resultArray, gaussianBlur, numberOfRows, numberOfCols);
-        
-        index--;
-    }
-    opFile = "result02-blur-" + fileName;
-    write_to_image(resultArray, numberOfRows, numberOfCols, maxGrayVal, opFile);
+    // MPI_Scatter(    valueArray, buffCnt, MPI_INT,
+    //                 recvBuff, buffCnt, MPI_INT,
+    //                 ROOT, MPI_COMM_WORLD    );
+    // apply_convolution<int>(recvBuff, recvBuff, edgeDetection, rowsToSend, numberOfCols);
+    // MPI_Gather(     recvBuff, buffCnt, MPI_INT,
+    //                 resultArray, buffCnt, MPI_INT,
+    //                 ROOT, MPI_COMM_WORLD    );
+    // if(rank == ROOT)
+    // {
+    //     opFile = "mpitest-" + fileName;
+    //     write_to_image(resultArray, numberOfRows, numberOfCols, maxGrayVal, opFile);
+    // }
 
-    set_result_array(resultArray, numberOfRows, numberOfCols);
-    index = blurInstances;
-    while (index > 0)
-    {
-        if (blurInstances == index)
-            apply_convolution<double>(valueArray, resultArray, gaussianBlur, numberOfRows, numberOfCols);
-        else
-            apply_convolution<double>(resultArray, resultArray, gaussianBlur, numberOfRows, numberOfCols);
-        
-        index--;
-    }    
-    apply_convolution<int>(resultArray, resultArray, sharpen, numberOfRows, numberOfCols);
-    apply_convolution<int>(resultArray, resultArray, edgeDetection, numberOfRows, numberOfCols);
-    opFile = "result03-all-" + fileName;
-    write_to_image(resultArray, numberOfRows, numberOfCols, maxGrayVal, opFile);
-    */
-	delete[] valueArray;
-    delete[] resultArray;
+	delete[] valueArray, resultArray, recvBuff, sendCounts, disps, megaResArray;
     for(int k=0; k < matSize; k++)
     {
         delete[] edgeDetection[k], gaussianBlur[k], sharpen[k];
