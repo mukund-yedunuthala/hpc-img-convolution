@@ -13,26 +13,20 @@ void get_file_data(std::ifstream& inputFile, int& numberOfRows, int& numberOfCol
 
 void set_value_array(int *array, int& rows, int& columns, std::stringstream& strStream)
 {
-    int h,w;
-    for ( h=0; h<rows; h++ )
-        for( w=0;  w<columns; w++ )
-        {
-            if(h<(rows)&&w<(columns))
-                strStream >> array[(h*columns)+w];
-            else
-                array[(h*columns)+w] = 0;         
-        }
+    int k = 0;
+    for (k; k<rows*columns; k++)
+    {
+        strStream >> array[k];
+    }
 }
 
 void set_result_array(int *array, int& rows, int& cols)
 {
-    int h,w;
-    for ( h=0; h<rows; h++ )
+    
+    int k = 0;
+    for (k; k<rows*cols; k++)
     {
-        for( w=0;  w<cols; w++ )
-        {
-            array[(h*cols)+w] = 0;         
-        }
+        array[k] = 0;
     }
 }
 
@@ -97,7 +91,7 @@ void apply_convolution( int *valueArray,
             {
                 for(int j=0; j<s; j++)
                 {
-                    acc += valueArray[(((x-i+2)%rows)*cols)+((y-j+2)%cols)]*operation[i][j];
+                    acc += valueArray[(((x+2-i)%rows)*cols)+((y+2-j)%cols)]*operation[i][j];
                 }
             }
             if (acc>=0 && acc<=255)
@@ -115,16 +109,16 @@ void apply_convolution( int *valueArray,
 int main(int argc, char** argv)
 {
     int rank, SIZE, ROOT = 0;
+    double time;
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &SIZE);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    // std::cout << "Rank = " << rank << ", Size = " << SIZE << "\n";
-    MPI_Barrier(MPI_COMM_WORLD);
 
+    time = MPI_Wtime();
     int numberOfRows = 0, numberOfCols = 0, maxGrayVal = 0, blurInstances = 5, matSize = 3;
     std::string fileName, opFile;
     std::stringstream strStream;
-    fileName = "test.pgm";
+    fileName = "512.pgm";
     std::ifstream inputFile(fileName);
     get_file_data(inputFile, numberOfRows, numberOfCols, maxGrayVal, strStream);
     int arrSize = numberOfCols*numberOfRows;
@@ -139,10 +133,10 @@ int main(int argc, char** argv)
         std::cout << "Image convolution using MPI\n";
         std::cout << "High Performance Computing and Optimization | WS2020-21\n";
         std::cout << "Technische Universitaet Bergakademie Freiberg\n";
-        std::string separator(60,'=');
-        std::cout << separator << "\n\n";
+        std::string separator(75,'=');
+        std::cout << separator << "\n";
         std::cout << "Version of PGM Image: P2\n";
-        std::cout << "Rows present: " << numberOfRows;
+        std::cout << "Rows present: " <<numberOfRows;
         std::cout <<  " Columns present: " << numberOfCols << "\n";
         std::cout << "Maximum gray value: " << maxGrayVal << "\n";
     }
@@ -161,43 +155,70 @@ int main(int argc, char** argv)
     set_kernels(edgeDetection, sharpen, gaussianBlur, matSize);
     
     int rowsToSend = (numberOfRows/SIZE);
-    int *recvBuff, *sendCounts, *disps, *megaResArray;
-    int remRows = numberOfRows%SIZE, sum = 0;
-    int buffCnt = (rowsToSend+remRows)*numberOfCols;
-    recvBuff = new int[buffCnt];
-    sendCounts = new int[SIZE];
-    disps = new int[SIZE];
-    for(int r = 0; r < SIZE; r++)
+    int buffCount = rowsToSend*numberOfCols, *recvBuff;    
+    recvBuff = new int[buffCount];
+    MPI_Scatter(    valueArray, buffCount, MPI_INT,
+                    recvBuff, buffCount, MPI_INT,
+                    ROOT, MPI_COMM_WORLD    );
+    apply_convolution<int>(recvBuff, recvBuff, edgeDetection, rowsToSend, numberOfCols);
+    MPI_Gather(     recvBuff, buffCount, MPI_INT,
+                    resultArray, buffCount, MPI_INT,
+                    ROOT, MPI_COMM_WORLD    );
+    if(rank == ROOT)
     {
-        sendCounts[r] = buffCnt;
-        if(r==SIZE-1)
-        {
-            sendCounts[r] += remRows * numberOfCols;
-        }
-        disps[r] = sum;
-        sum += sendCounts[r];
+        opFile = "mpi-edge-detection-" + fileName;
+        write_to_image(resultArray, numberOfRows, numberOfCols, maxGrayVal, opFile);
     }
-    MPI_Scatterv(valueArray, sendCounts, disps, MPI_INT, recvBuff, buffCnt, MPI_INT, ROOT, MPI_COMM_WORLD);
+    MPI_Scatter(    valueArray, buffCount, MPI_INT,
+                    recvBuff, buffCount, MPI_INT,
+                    ROOT, MPI_COMM_WORLD    );
+    set_result_array(resultArray, numberOfRows, numberOfCols);
+    int index = blurInstances;
+    while(index>0)
+    {
+        apply_convolution<double>(recvBuff, recvBuff, gaussianBlur, rowsToSend, numberOfCols);
+        index--;
+    }
+    MPI_Gather(     recvBuff, buffCount, MPI_INT,
+                    resultArray, buffCount, MPI_INT,
+                    ROOT, MPI_COMM_WORLD    );
+    if(rank == ROOT)
+    {
+        opFile = "mpi-blur-" + fileName;
+        write_to_image(resultArray, numberOfRows, numberOfCols, maxGrayVal, opFile);
+    }
+    MPI_Scatter(    valueArray, buffCount, MPI_INT,
+                    recvBuff, buffCount, MPI_INT,
+                    ROOT, MPI_COMM_WORLD    );
+    set_result_array(resultArray, numberOfRows, numberOfCols);
+    index = blurInstances;
+    while(index>0)
+    {
+        apply_convolution<double>(recvBuff, recvBuff, gaussianBlur, rowsToSend, numberOfCols);
+        index--;
+    }
+    apply_convolution<int>(recvBuff, recvBuff, sharpen, rowsToSend, numberOfCols);
+    apply_convolution<int>(recvBuff, recvBuff, edgeDetection, rowsToSend, numberOfCols);
+    MPI_Gather(     recvBuff, buffCount, MPI_INT,
+                    resultArray, buffCount, MPI_INT,
+                    ROOT, MPI_COMM_WORLD    );
+    if(rank == ROOT)
+    {
+        opFile = "mpi-all-" + fileName;
+        write_to_image(resultArray, numberOfRows, numberOfCols, maxGrayVal, opFile);
+    }
 
-    // MPI_Scatter(    valueArray, buffCnt, MPI_INT,
-    //                 recvBuff, buffCnt, MPI_INT,
-    //                 ROOT, MPI_COMM_WORLD    );
-    // apply_convolution<int>(recvBuff, recvBuff, edgeDetection, rowsToSend, numberOfCols);
-    // MPI_Gather(     recvBuff, buffCnt, MPI_INT,
-    //                 resultArray, buffCnt, MPI_INT,
-    //                 ROOT, MPI_COMM_WORLD    );
-    // if(rank == ROOT)
-    // {
-    //     opFile = "mpitest-" + fileName;
-    //     write_to_image(resultArray, numberOfRows, numberOfCols, maxGrayVal, opFile);
-    // }
-
-	delete[] valueArray, resultArray, recvBuff, sendCounts, disps, megaResArray;
+	delete[] valueArray, resultArray, recvBuff;
     for(int k=0; k < matSize; k++)
     {
         delete[] edgeDetection[k], gaussianBlur[k], sharpen[k];
     }
     delete[] edgeDetection, sharpen, gaussianBlur;
+    time = MPI_Wtime() - time;
+    if(rank==ROOT){
+        std::string separator(75,'-');
+        std::cout << separator << "\n" << "Time taken: " << time << "\n" << separator << "\n";
+    }
     MPI_Finalize();
     return 0;
 }
