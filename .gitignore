@@ -3,6 +3,7 @@
 *.jpg
 *.out
 test-mpi-scatterv.cpp
+.vscode/
 # latex 
 ## Core latex/pdflatex auxiliary files:
 *.aux

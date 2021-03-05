@@ -1,0 +1,15 @@
+#!/bin/bash
+#PBS -N MPI
+#PBS -q teaching
+#PBS -l select=1:ncpus=1:mem=2gb:mpiprocs=1
+#PBS -l walltime=00:03:00
+#PBS -o pbs_out.txt
+#PBS -e pbs_err.txt
+module load gnu/gcc/8.1.0
+module load openmpi/gcc/7.1.0/2.1.2
+PBS_O_WORKDIR=$HOME/project/
+cd $PBS_O_WORKDIR
+cat $PBS_NODEFILE > pbs_info.txt
+echo $OMP_NUM_THREADS >> pbs_info.txt
+mpic++ -o main.out main.cpp
+mpirun ./main.out

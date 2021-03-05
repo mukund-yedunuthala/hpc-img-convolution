@@ -1,0 +1,198 @@
+[vy30pezi@login01 project]$ cat pbs_out.txt 
+Image convolution using MPI
+High Performance Computing and Optimization | WS2020-21
+Technische Universitaet Bergakademie Freiberg
+===========================================================================
+Version of PGM Image: P2
+Rows present: 8162 Columns present: 8162
+Maximum gray value: 255
+---------------------------------------------------------------------------
+Time taken: 110.343
+---------------------------------------------------------------------------
+[vy30pezi@login01 project]$ cat pbs_info.txt 
+node135.cluster
+1
+===========================================================================
+[vy30pezi@login01 project]$ cat pbs_out.txt 
+Image convolution using MPI
+High Performance Computing and Optimization | WS2020-21
+Technische Universitaet Bergakademie Freiberg
+===========================================================================
+Version of PGM Image: P2
+Rows present: 8162 Columns present: 8162
+Maximum gray value: 255
+---------------------------------------------------------------------------
+Time taken: 65.7565
+---------------------------------------------------------------------------
+[vy30pezi@login01 project]$ cat pbs_info.txt 
+node135.cluster
+node135.cluster
+===========================================================================
+[vy30pezi@login01 project]$ cat pbs_out.txt 
+Image convolution using MPI
+High Performance Computing and Optimization | WS2020-21
+Technische Universitaet Bergakademie Freiberg
+===========================================================================
+Version of PGM Image: P2
+Rows present: 8162 Columns present: 8162
+Maximum gray value: 255
+---------------------------------------------------------------------------
+Time taken: 44.1766
+---------------------------------------------------------------------------
+[vy30pezi@login01 project]$ cat pbs_info.txt 
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+===========================================================================
+[vy30pezi@login01 project]$ cat pbs_out.txt 
+Image convolution using MPI
+High Performance Computing and Optimization | WS2020-21
+Technische Universitaet Bergakademie Freiberg
+===========================================================================
+Version of PGM Image: P2
+Rows present: 8162 Columns present: 8162
+Maximum gray value: 255
+---------------------------------------------------------------------------
+Time taken: 38.5102
+---------------------------------------------------------------------------
+[vy30pezi@login01 project]$ cat pbs_info.txt 
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+===========================================================================
+[vy30pezi@login01 project]$ cat pbs_out.txt 
+Image convolution using MPI
+High Performance Computing and Optimization | WS2020-21
+Technische Universitaet Bergakademie Freiberg
+===========================================================================
+Version of PGM Image: P2
+Rows present: 8162 Columns present: 8162
+Maximum gray value: 255
+---------------------------------------------------------------------------
+Time taken: 35.1828
+---------------------------------------------------------------------------
+[vy30pezi@login01 project]$ cat pbs_info.txt 
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+===========================================================================
+[vy30pezi@login01 project]$ cat pbs_out.txt 
+Image convolution using MPI
+High Performance Computing and Optimization | WS2020-21
+Technische Universitaet Bergakademie Freiberg
+===========================================================================
+Version of PGM Image: P2
+Rows present: 8162 Columns present: 8162
+Maximum gray value: 255
+---------------------------------------------------------------------------
+Time taken: 32.7586
+---------------------------------------------------------------------------
+[vy30pezi@login01 project]$ cat pbs_info.txt 
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+===========================================================================
+[vy30pezi@login01 project]$ cat pbs_out.txt 
+Image convolution using MPI
+High Performance Computing and Optimization | WS2020-21
+Technische Universitaet Bergakademie Freiberg
+===========================================================================
+Version of PGM Image: P2
+Rows present: 8162 Columns present: 8162
+Maximum gray value: 255
+---------------------------------------------------------------------------
+Time taken: 53.1254
+---------------------------------------------------------------------------
+[vy30pezi@login01 project]$ cat pbs_info.txt 
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+===========================================================================
+[vy30pezi@login01 project]$ cat pbs_out.txt 
+Image convolution using MPI
+High Performance Computing and Optimization | WS2020-21
+Technische Universitaet Bergakademie Freiberg
+===========================================================================
+Version of PGM Image: P2
+Rows present: 8162 Columns present: 8162
+Maximum gray value: 255
+---------------------------------------------------------------------------
+Time taken: 130.929
+---------------------------------------------------------------------------
+[vy30pezi@login01 project]$ cat pbs_info.txt 
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+node135.cluster
+===========================================================================
