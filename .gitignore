@@ -4,6 +4,8 @@
 *.out
 test-mpi-scatterv.cpp
 .vscode/
+data/
+output/
 # latex 
 ## Core latex/pdflatex auxiliary files:
 *.aux
