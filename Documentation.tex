@@ -5,6 +5,7 @@
 \usepackage{csquotes}
 \usepackage{hyperref}
 \usepackage{amsmath}
+\usepackage{graphicx}
 \usepackage{subcaption}
 \usepackage[backend=biber,sorting=none]{biblatex}
 % \bibliography{References}
@@ -31,12 +32,7 @@ kernels:
 
 The program thus developed has been implemented in parallel with Message Passing Interface (MPI) 
 using C++ programming language in the high performance computing cluster of TU Bergakademie Freiberg. 
-The program has been implemented on the following two images:
-\begin{itemize}
-    \item 512 x 512 pixel grayscale image.
-    \item 8162 x 8162 pixel grayscale image.
-\end{itemize}
-No suited external libraries have been used or implemented in the code belonging to this project.
+
 \subsection*{Format of the grayscale image}
 The images provided are in Netpbm grayscale image format. Quoted as "the lowest common denominator grayscale 
 file format," this format had been chosen due to its ease in coding. Unlike the color images consisting of three color channels,
@@ -44,14 +40,14 @@ with every pixel displaying the combined information of Red, Green and Blue chan
 The images considered in this project are said to be of 8-bit depth, i.e. the values of the pixels lie within the interval $[0,255]$.
 The value 0 describes black, whereas 255 describes white. The images provided within this project are of uncompressed PGM data format. 
 Therefore, initially, these values are read into a two-dimensional arrays, which are worked upon. Upon completion, the resultant arrays 
-are written to file as per the specifications, which can then be converted to different formats using ImageMagick application. 
+are written to file as per the specifications, which can then be converted to different formats using ImageMagick software. 
 \section{Convolution kernels}
 Within the context of image processing, a convolution kernel, or a kernel, refers to a matrix that allows manipulation of values of pixel
 as per requirements. The procedure, known as convolution, refers to the process of computing a new pixel value from the given pixel value along
 with its surrounding pixel values. The kernels are specified below. 
 
 \subsection{Gaussian Blur}
-The aim of this kernel is to smoothen an image, or reduce the noise or detail within an image. The 3 x 3 matrix for this operation is 
+The aim of this kernel is to smoothen an image, or reduce the noise or detail within an image.
 specified below. 
 $$
     \frac{1}{16}
@@ -60,8 +56,7 @@ $$
     \end{bmatrix}
 $$
 \subsection{Sharpen}
-The aim of this kernel is to enhance the sharpness of the image, can be understood to be the opposite of blur. The 3 x 3 matrix for this operation
-is specified below. 
+The aim of this kernel is to enhance the sharpness of the image, can be understood to be the opposite of blur.
 $$
     \begin{bmatrix}
         0 & -1 & 0 \\ -1 & 5 & -1 \\ 0 & -1 & 0
@@ -69,7 +64,7 @@ $$
 $$
 \subsection{Edge Detection}
 The aim of this kernel is to identify the edges present in the image. In the context of image processing, an edge can be understood as the collection of 
-points where the brightness suddenly changes, or has discontinuities. The 3 x 3 matrix used for this operation is shown below. 
+points where the brightness suddenly changes, or has discontinuities.
 $$
 \begin{bmatrix}
     -1 & -1 & -1 \\ -1 & 8 & -1 \\ -1 & -1 & -1
@@ -81,17 +76,15 @@ where $(x,y)$ denotes the position in the image. Convolution procedure can be sh
 $$ I^*(x,y) = \sum_{i=1}^{n}\sum_{i=1}^{n}I(x-i+2,y-j+2)k(i,j) $$ where $k$ represents the chosen 3 x 3 convolution kernel.
 An important aspect to note is the treatment of pixel values at the boundaries of the image. In this implementation, these
 are treated periodically, i.e. the pixel value at positon $(1,0)$ receives information from $(1,511)$, the opposite border,
-in order to finish the computation of new pixel value. This is achieved by using modulo operator within the loops, as opposed
-to another popular method known as padding. 
+in order to finish the computation of new pixel value.
 
-\newpage
 \section{MPI Parallelization and Communication}
 
 For the parallel implementation of this code, MPI library is applied. The pixel values are thus distributed in a way such that each process has its own
 chunk of rows of pixel values, including the information belonging to the halo. Here, a halo refers to the rows of pixels indicated by dashed lines in the figure
-The figure representing this division can be seen here. Subsequent execution of this program is achieved using university cluster's PBS queue system, using a script file.
-The wall times are then tabulated. 
-\begin{figure}[h!]
+The figure representing this division can be seen here in Fig.\ref{Fig.1}. The code is then executed on the university's high performance computing cluster and the
+times are tabulated against number of processes to assess scalability.
+\begin{figure}
     \centering
     \includegraphics[scale=0.5]{"MPI".png}
     \caption{Distribution of data between processes}
@@ -99,7 +92,9 @@ The wall times are then tabulated.
 \end{figure}
 \newpage
 \section{Results}
-At the beginning, the results belonging to the 512 x 512 image are presented.
+At the beginning, the results belonging to the 512 x 512 image are presented. Fig.\ref{Fig.2a} presents the 
+original image, Fig.\ref{Fig.2b} shows the image after application of edge detection convolution. Fig.\ref{Fig.2c} 
+and Fig.\ref{Fig.2d} present the result of blurring and application of all three kernels respectively.
 \vfill
 \begin{figure}
     \centering
@@ -118,7 +113,7 @@ At the beginning, the results belonging to the 512 x 512 image are presented.
     \begin{subfigure}{.45\textwidth}
         \centering
         \includegraphics[scale=0.4]{"result02-blur-512".png}
-        \caption{After application of gaussian blur}
+        \caption{After application of blur}
         \label{Fig.2c}
     \end{subfigure}
     \begin{subfigure}{.45\textwidth}
@@ -131,4 +126,23 @@ At the beginning, the results belonging to the 512 x 512 image are presented.
     \label{Fig.2}
 \end{figure}
 \vfill
+\newpage
+The times measured for execution on the cluster are tabulated below. It could be 
+construed from this table that the program exhibits marginal scalability.
+\begin{table}[]
+    \centering
+    \begin{tabular}{lll}
+    \textbf{\#P} & \textbf{With I/O} & \textbf{Without I/O} \\
+    1            & 43.8              & 31.7                 \\
+    2            & 36.7              & 28.0                 \\
+    4            & 28.6              & 24.6                 \\
+    6            & 27.8              & 24.5                 \\
+    8            & 27.0              & 24.3                 \\
+    12           & 26.6              & 24.0                 \\
+    24           & 49.1              & 42.8                 \\
+    36           & 125.7             & 61.2                
+    \end{tabular}
+    \caption{Measured times for different numbers of processes}
+    \label{tab:time}
+    \end{table}
 \end{document}

@@ -1,8 +1,25 @@
+/**
+ * \file
+ * \brief File for image convolution using MPI
+ * \author Venkata Mukund Kashyap Yedunuthala
+ * \date 14 September 2021
+ */ 
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <mpi.h>
+
+/**
+ * \brief Reads data from specified ```.pgm``` file
+ * \param inputFile The ifstream variable of the file
+ * \param numberOfRows Output - The number of rows in image from the file.
+ * \param numberOfCols Output - The number of columns in image from the file. 
+ * \param maxGrayVal Output - The maximum possible value for a 
+ * pixel in the image. 
+ * \param strStream The string stream variable that aids in reading data in.
+ */
 
 void get_file_data(std::ifstream& inputFile, int& numberOfRows, 
         int& numberOfCols, int& maxGrayVal, std::stringstream& strStream)
@@ -12,6 +29,17 @@ void get_file_data(std::ifstream& inputFile, int& numberOfRows,
     strStream << inputFile.rdbuf();
     strStream >> numberOfCols >> numberOfRows >> maxGrayVal;
 }
+
+/**
+ * \brief Reads the values at each pixel and assigns them to a one-dimensional array.
+ * \param array One-dimensional array that will contain all pixel values.
+ * \param rows Input - The number of rows in image, 
+ * read from the file using ```get_file_data()```.
+ * \param columns Input - The number of columns in image, read 
+ * from the file using ```get_file_data()```. 
+ * \param strStream The string stream variable that aids in reading data in, 
+ * initialised using ```get_file_data()```.
+ */
 
 void set_value_array(int *array, int& rows, 
     int& columns, std::stringstream& strStream)
@@ -23,6 +51,15 @@ void set_value_array(int *array, int& rows,
     }
 }
 
+/**
+ * \brief Initializes the values of an array to zero.
+ * \param array One-dimensional array that will contain all pixel values.
+ * \param rows Input - The number of rows in image, read from 
+ * the file using ```get_file_data()```.
+ * \param cols Input - The number of columns in image, read from 
+ * the file using ```get_file_data()```. 
+ */
+
 void set_result_array(int *array, int& rows, int& cols)
 {
     
@@ -33,6 +70,17 @@ void set_result_array(int *array, int& rows, int& cols)
     }
 }
 
+/**
+ * \brief Writes the values present in an array to a file of ```.pgm``` format.
+ * \param array Input - array from which the file is to be written.
+ * \param rows Input - The number of rows in image, read from
+ *  the input file using ```get_file_data()```.
+ * \param cols Input - The number of columns in image, read from 
+ * the input file using ```get_file_data()```. 
+ * \param greyvalue Input - The maximum possible value for a pixel in the image,
+ *  read from the input file using ```get_file_data()```. 
+ * \param fileName Input - Name of the image file to be written.
+ */
 void write_to_image(int *array, int& rows, 
     int& cols, int& greyvalue, std::string& fileName)
 {
@@ -50,7 +98,14 @@ void write_to_image(int *array, int& rows,
     outputFile.close();
 }
 
-
+/**
+ * \brief Assigns values to image convolution kernels.
+ * \param edgeDetection Array to store values of edge detection kernel.
+ * \param sharpen Array to store values of image sharpening kernel.
+ * \param gaussianBlur Array to store values of blurring kernel.
+ * \param identity Array to store values of identity kernel.
+ * \param s Size of the kernels, here 3.
+ */
 void set_kernels(int **edgeDetection, int **sharpen, 
     double **gaussianBlur, int **identity, int& s)
 {
@@ -81,9 +136,22 @@ void set_kernels(int **edgeDetection, int **sharpen,
     }
 }
 
+/**
+ * \brief Template for convolution kernels that allows usage of 
+ * type-appropriate variables.
+ */
 template <typename kernel>
 struct convolutions 
 {
+    /**
+     * \brief Function for convolution
+     * \param valueArray Source array upon which convolution is performed.
+     * \param resultArray Resultant array after convolution
+     * \param operation Convolution operation. Available: edgeDetection,
+     *  gaussianBlur, sharpen, identity.
+     * \param rows Number of rows in the chunk.
+     * \param cols Number of columns in the chunk.
+     */
     static void apply_convolution( kernel *valueArray, kernel *resultArray,
             kernel **operation, int& rows, int& cols)
     {
@@ -99,7 +167,8 @@ struct convolutions
                 {
                     for(int j=0; j<s; j++)
                     {
-                        acc += valueArray[((x+2-i)%rows)*cols+((y+2-j)%cols)]*operation[i][j];
+                        acc += valueArray[((x+2-i)%rows)*cols+((y+2-j)%cols)] \
+                        * operation[i][j];
                     }
                 }
                 if (acc>=0 && acc<=255)
@@ -117,6 +186,20 @@ struct convolutions
 
     }
 
+    /**
+     * \brief Function to set up convolutions using MPI. Takes input array
+     * and scatters the data to available processes in the specified 
+     * communicator. Also communicates halo information to appropriate 
+     * processes.
+     * \param numRows Number of rows present in the input array.
+     * \param numCols Number of columns present in the input array.
+     * \param valueArray The input array.
+     * \param convKernel Kernel for appropriate convolution, as defined 
+     * in ```set_kernels()```.
+     * \param resultArray The resultant array that will be written to image.
+     * \param INSTANCES Number of times the convolution operation is to be 
+     * performed. 
+     */
     static void mpi_convolution(int numRows, int numCols, int *valueArray, 
                     kernel **convKernel, int *resultArray, int INSTANCES = 1)
     {
@@ -221,7 +304,16 @@ struct convolutions
 
 
 int main(int argc, char** argv)
-{
+{   
+/**
+ * \brief The main function. Reads ```.pgm``` format image in, 
+ * sets up convolutions and performs them using MPI. 
+ * Finally writes the image to memory in ```.pgm``` format.
+ * Prints the time taken to shell. 
+ * \param argc Number of arguments.
+ * \param argv Arguments.
+ * \return EXIT_SUCCESS or EXIT_FAILURE depending on the situation.
+ */
     int rank, SIZE, ROOT = 0;
     double time;
     MPI_Init(&argc, &argv);
@@ -243,10 +335,10 @@ int main(int argc, char** argv)
     valueArray = new int [arrSize];
     resultArray = new int [arrSize];    
 
-    set_value_array(valueArray, numberOfRows, numberOfRows, strStream);
+    if(rank == ROOT) set_value_array(valueArray, numberOfRows, numberOfRows, strStream);
     set_result_array(resultArray, numberOfRows, numberOfCols);
     inputFile.close();
-
+    
     if(rank == ROOT)
     {
         std::cout << "Image convolution using MPI\n";
@@ -260,7 +352,7 @@ int main(int argc, char** argv)
         std::cout <<  " Columns present: " << numberOfCols << "\n";
         std::cout << "Maximum gray value: " << maxGrayVal << "\n";
     }
-
+    
     int **edgeDetection, **sharpen, **identity;
     double **gaussianBlur;
     edgeDetection = new int *[matSize];
