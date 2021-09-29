@@ -81,6 +81,7 @@ void set_result_array(int *array, int& rows, int& cols)
  *  read from the input file using ```get_file_data()```. 
  * \param fileName Input - Name of the image file to be written.
  */
+
 void write_to_image(int *array, int& rows, 
     int& cols, int& greyvalue, std::string& fileName)
 {
@@ -155,8 +156,6 @@ struct convolutions
     static void apply_convolution( kernel *valueArray, kernel *resultArray,
             kernel **operation, int& rows, int& cols)
     {
-        int rank;
-        MPI_Comm_rank(MPI_COMM_WORLD,&rank);
         int s = 3;
         for(int x=0; x<rows; x++)
         {
@@ -171,6 +170,7 @@ struct convolutions
                         * operation[i][j];
                     }
                 }
+                // eliminating undesired values by hard coding limits
                 if (acc>=0 && acc<=255)
                     resultArray[(x*cols)+y] = acc;
 
@@ -179,11 +179,8 @@ struct convolutions
             
                 else
                     resultArray[(x*cols)+y] = 255;
-                
-
             }
         }
-
     }
 
     /**
@@ -200,74 +197,96 @@ struct convolutions
      * \param INSTANCES Number of times the convolution operation is to be 
      * performed. 
      */
+
     static void mpi_convolution(int numRows, int numCols, int *valueArray, 
                     kernel **convKernel, int *resultArray, int INSTANCES = 1)
     {
         int SIZE, rank, ROOT = 0;
         MPI_Comm_size(MPI_COMM_WORLD, &SIZE);
         MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-        int rowsToSend = (numRows/SIZE);
-        int buffCount = rowsToSend*numCols, *recvBuff;
+
+        int rowsToSend = (numRows/SIZE); // divides the available rows into chunks
+        int buffCount = rowsToSend*numCols; // chunk size per process 
+        int sender1, sender2, receiver1, receiver2; // ranks for halo exchange
+
+        // initializing arrays for MPI communication
+
+        int *recvBuff, *sendHalo1, *sendHalo2, *recvHalo1, *recvHalo2; 
         recvBuff = new int[buffCount];
-        int src1, src2, dest1, dest2;
-        int *sendHalo1, *sendHalo2, *recvHalo1, *recvHalo2;
         sendHalo1 = new int[numCols];
         sendHalo2 = new int[numCols];
         recvHalo1 = new int[numCols];
         recvHalo2 = new int[numCols];
+
+        // initializing arrays upon which convolution is performed
+
         int convRows = rowsToSend+2;
         int convCount = convRows*numCols;
         kernel *convBuff;
         convBuff = new kernel[convCount];
+
+        // scattering to recvBuff
+
         MPI_Scatter(valueArray, buffCount, MPI_INT,
             recvBuff, buffCount, MPI_INT, ROOT, MPI_COMM_WORLD);
+
+        // Halo communication - initializing rows to be sent
 
         for(int i = 0; i < numCols; i++)
         {
             sendHalo1[i] = recvBuff[i];
             sendHalo2[i] = recvBuff[i+((rowsToSend-1)*numCols)];
         }
+
+        // setting up senders and receivers
+
         if (SIZE == 1)
         {
-            dest1 = 0;
-            dest2 = 0;
-            src1 = 0;
-            src2 = 0;
+            receiver1 = 0;
+            receiver2 = 0;
+            sender1 = 0;
+            sender2 = 0;
         }
         else
         {
             if (rank == 0)
             {
-                dest1 = SIZE - 1;
-                dest2 = rank + 1;
-                src1 = SIZE - 1;
-                src2 = rank + 1;
+                receiver1 = SIZE - 1;
+                receiver2 = rank + 1;
+                sender1 = SIZE - 1;
+                sender2 = rank + 1;
             }
             else if (rank == SIZE - 1)
             {
-                dest1 = rank - 1;
-                dest2 = 0;
-                src1 = rank - 1;
-                src2 = 0;
+                receiver1 = rank - 1;
+                receiver2 = 0;
+                sender1 = rank - 1;
+                sender2 = 0;
             }
             else
             {
-                dest1 = rank - 1;
-                dest2 = rank + 1;
-                src1 = rank - 1;
-                src2 = rank + 1;
+                receiver1 = rank - 1;
+                receiver2 = rank + 1;
+                sender1 = rank - 1;
+                sender2 = rank + 1;
             }
         }
+
+        // MPI instant send and receive operations 
+        // for non-blocking communication
+
         MPI_Request req[2];
         MPI_Isend(sendHalo1, numCols, MPI_INT, 
-            dest1, 1, MPI_COMM_WORLD, &req[0]);
+            receiver1, 1, MPI_COMM_WORLD, &req[0]);
         MPI_Isend(sendHalo2, numCols, MPI_INT, 
-            dest2, 2, MPI_COMM_WORLD, &req[1]);
+            receiver2, 2, MPI_COMM_WORLD, &req[1]);
         MPI_Irecv(recvHalo1, numCols, MPI_INT, 
-            src1, 2, MPI_COMM_WORLD, &req[1]);
+            sender1, 2, MPI_COMM_WORLD, &req[1]);
         MPI_Irecv(recvHalo2, numCols, MPI_INT, 
-            src2, 1, MPI_COMM_WORLD, &req[0]);
+            sender2, 1, MPI_COMM_WORLD, &req[0]);
         MPI_Waitall(2, req, MPI_STATUSES_IGNORE);
+
+        // setting up convolution array with received halo arrays
 
         for (int i = 0; i < convCount; i++)
         {
@@ -281,7 +300,7 @@ struct convolutions
                 convBuff[i] = recvBuff[i-numCols];
             }
         }
-        
+
         while (INSTANCES>0)
         {
             apply_convolution(convBuff, convBuff, 
@@ -293,8 +312,13 @@ struct convolutions
         {   
             recvBuff[i] = convBuff[i];
         }
+
+        // gathering into resultArray after convolution
+
         MPI_Gather(recvBuff, buffCount, MPI_INT,
             resultArray, buffCount, MPI_INT, ROOT, MPI_COMM_WORLD);
+    
+        // freeing memory allocated
 
         delete[] recvBuff, convBuff;
         delete[] sendHalo1, sendHalo2, recvHalo1, recvHalo2;
@@ -312,6 +336,12 @@ int main(int argc, char** argv)
  * Prints the time taken to shell. 
  * \param argc Number of arguments.
  * \param argv Arguments.
+ * \remark File performs the following four tasks:
+ * \remark Task 01: Convolution with edge detection kernel - one instance
+ * \remark Task 02: Convolution with blur kernel - one instance
+ * \remark Task 03: Convolution with sharpen kernel - one instance
+ * \remark Task 04: Convolution with blur - five instances, 
+ * then edge detection, and sharpen - one instance each. 
  * \return EXIT_SUCCESS or EXIT_FAILURE depending on the situation.
  */
     int rank, SIZE, ROOT = 0;
@@ -320,9 +350,12 @@ int main(int argc, char** argv)
     MPI_Comm_size(MPI_COMM_WORLD, &SIZE);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    time = MPI_Wtime();
+    time = MPI_Wtime(); // recording time at the beginning 
     int numberOfRows = 0, numberOfCols = 0, maxGrayVal = 0, \
     blurInstances = 5, matSize = 3;
+
+    // reading from file 
+
     std::string fileName, opFile;
     std::stringstream strStream;
     fileName = "512.pgm";
@@ -335,6 +368,7 @@ int main(int argc, char** argv)
     valueArray = new int [arrSize];
     resultArray = new int [arrSize];    
 
+    // reading data into arrays only on ROOT process
     if(rank == ROOT) set_value_array(valueArray, numberOfRows, numberOfRows, strStream);
     set_result_array(resultArray, numberOfRows, numberOfCols);
     inputFile.close();
@@ -352,6 +386,8 @@ int main(int argc, char** argv)
         std::cout <<  " Columns present: " << numberOfCols << "\n";
         std::cout << "Maximum gray value: " << maxGrayVal << "\n";
     }
+
+    // allocating space for convolution kernels and initializing
     
     int **edgeDetection, **sharpen, **identity;
     double **gaussianBlur;
@@ -396,7 +432,7 @@ int main(int argc, char** argv)
         write_to_image(resultArray, numberOfRows, 
             numberOfCols, maxGrayVal, opFile);
     }
-
+    
     set_result_array(resultArray, numberOfRows, numberOfCols);
     convolutions<double>::mpi_convolution(numberOfRows, numberOfCols,
         valueArray, gaussianBlur, resultArray, 5);
@@ -404,6 +440,8 @@ int main(int argc, char** argv)
         resultArray, edgeDetection, resultArray, 1);
     convolutions<int>::mpi_convolution(numberOfRows, numberOfCols,
         resultArray, sharpen, resultArray, 1);
+
+    // ROOT rank writes the resultant array to file in .pgm format
     if(rank == ROOT)
     {
         opFile = "output/mpi-all-halo-" + fileName;
@@ -411,19 +449,20 @@ int main(int argc, char** argv)
             numberOfCols, maxGrayVal, opFile);
     }
 
-
+    // freeing up allocated memory
 	delete[] valueArray, resultArray;
     for(int k=0; k < matSize; k++)
     {
         delete[] edgeDetection[k], gaussianBlur[k], sharpen[k], identity[k];
     }
     delete[] edgeDetection, sharpen, gaussianBlur, identity;
-    time = MPI_Wtime() - time;
+    time = MPI_Wtime() - time; // recording total time taken
     if(rank==ROOT){
         std::string separator(75,'-');
         std::cout << separator << "\n" << "Time taken: " \
         << time << "\n" << separator << "\n";
     }
+
     MPI_Finalize();
     return 0;
 }
