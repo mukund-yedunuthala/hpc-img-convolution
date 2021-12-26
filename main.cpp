@@ -358,7 +358,7 @@ int main(int argc, char** argv)
 
     std::string fileName, opFile;
     std::stringstream strStream;
-    fileName = "512.pgm";
+    fileName = "8162.pgm";
     std::ifstream inputFile(fileName);
     get_file_data(inputFile, numberOfRows, numberOfCols, 
         maxGrayVal, strStream);
@@ -369,7 +369,7 @@ int main(int argc, char** argv)
     resultArray = new int [arrSize];    
 
     // reading data into arrays only on ROOT process
-    if(rank == ROOT) set_value_array(valueArray, numberOfRows, numberOfRows, strStream);
+    set_value_array(valueArray, numberOfRows, numberOfRows, strStream);
     set_result_array(resultArray, numberOfRows, numberOfCols);
     inputFile.close();
     
@@ -406,32 +406,26 @@ int main(int argc, char** argv)
     
     convolutions<int>::mpi_convolution(numberOfRows, numberOfCols,
         valueArray, edgeDetection, resultArray, 1);
-    if(rank == ROOT)
-    {
+
         opFile = "output/mpi-edge-halo-" + fileName;
         write_to_image(resultArray, numberOfRows, 
             numberOfCols, maxGrayVal, opFile);
-    }
 
     set_result_array(resultArray, numberOfRows, numberOfCols);
     convolutions<double>::mpi_convolution(numberOfRows, numberOfCols,
         valueArray, gaussianBlur, resultArray, 1);
-    if(rank == ROOT)
-    {
+
         opFile = "output/mpi-blur-halo-" + fileName;
         write_to_image(resultArray, numberOfRows, 
             numberOfCols, maxGrayVal, opFile);
-    }
 
     set_result_array(resultArray, numberOfRows, numberOfCols);
     convolutions<int>::mpi_convolution(numberOfRows, numberOfCols,
         valueArray, sharpen, resultArray, 1);
-    if(rank == ROOT)
-    {
+
         opFile = "output/mpi-sharpen-halo-" + fileName;
         write_to_image(resultArray, numberOfRows, 
             numberOfCols, maxGrayVal, opFile);
-    }
     
     set_result_array(resultArray, numberOfRows, numberOfCols);
     convolutions<double>::mpi_convolution(numberOfRows, numberOfCols,
@@ -442,12 +436,9 @@ int main(int argc, char** argv)
         resultArray, sharpen, resultArray, 1);
 
     // ROOT rank writes the resultant array to file in .pgm format
-    if(rank == ROOT)
-    {
         opFile = "output/mpi-all-halo-" + fileName;
         write_to_image(resultArray, numberOfRows, 
             numberOfCols, maxGrayVal, opFile);
-    }
 
     // freeing up allocated memory
 	delete[] valueArray, resultArray;
