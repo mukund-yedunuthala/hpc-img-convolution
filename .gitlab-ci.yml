@@ -11,7 +11,7 @@ pages:
   script:
     - apk update && apk add doxygen
     - doxygen hpc_convolution.doxy
-    - mv doc/html/ public/
+    - mv docs/html/ public/
   environment: production
   artifacts:
     paths:
