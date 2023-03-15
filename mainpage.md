@@ -7,21 +7,21 @@ This programming project applies three specific convolution kernels — blurring
 
 The following images show the original image with 512 x 512 pixels size, as well as the results upon application of edge detection, gaussian blur, and all three convolutions applied simultaneously. The same has then been implemented on the cluster on an image of size 8162 x 8162 pixels on varying number of processes. The walltime is measured and compared. 
 
-| ![Original image](inputs/512.png) |
+| ![Original image](../../inputs/512.png) |
 |:--:|
 |  Fig. 1: Original Image |
 
 
-| ![Blurred image](output/512blur.png) |
+| ![Blurred image](../../output/512blur.png) |
 |:--:|
 |  Fig. 2: Blurred Image |
 
 
-| ![Edges detected](output/512edge.png) |
+| ![Edges detected](../../output/512edge.png) |
 |:--:|
 |  Fig. 3: Edges detected |
 
 
-| ![Sharpened image](output/512sharpen.png) |
+| ![Sharpened image](../../output/512sharpen.png) |
 |:--:|
 |  Fig. 4: Sharpened Image |

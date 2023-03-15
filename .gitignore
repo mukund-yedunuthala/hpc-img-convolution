@@ -2,11 +2,9 @@
 *.pdf
 *.jpg
 *.out
-test-mpi-scatterv.cpp
 .vscode/
 data/
-output/
-doc/
+docs/
 # latex 
 ## Core latex/pdflatex auxiliary files:
 *.aux
