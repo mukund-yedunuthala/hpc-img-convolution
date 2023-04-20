@@ -7,7 +7,9 @@
 
 
 #include <math.h>
-#include <mpi.h>
+// #ifdef WITH_MPI 
+    #include<mpi.h>
+// #endif
 /**
  * \brief Performs convolution parameter with a given kernel on a given array.
  * \param valueArray Input array.

@@ -8,7 +8,7 @@
 #include "io.h"
 #include "helper.h"
 #include "convolutions.h"
-
+#include "HPC2020Config.h"
 /**
  * \brief Main function.
  * 
@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
     unsigned short int blurInstances{5}, edgeInstances{1}, sharpInstances{1};
     double wallTime{};
     std::string ipFileName{""}, opFileName{""};
-    ipFileName = "inputs/512.pgm";
+    ipFileName = "../inputs/512.pgm";
 
     std::stringstream strStream;
     std::ifstream ipFile{ipFileName};
@@ -61,7 +61,6 @@ int main(int argc, char** argv) {
     }
     // std::cout << "Edge address (out): " << &edgeDetection << std::endl;
     set_kernels(edgeDetection, identity, sharpen, gaussBlur);
-    
     MPI_Init(&argc, &argv);
     wallTime = MPI_Wtime();
     MPI_Comm_size(MPI_COMM_WORLD, &WORLD_SIZE);
@@ -73,7 +72,7 @@ int main(int argc, char** argv) {
             numRows, numCols, valueArray, edgeDetection,
             resultArray, matSize, edgeInstances 
         );
-    opFileName = "output/512edge.pgm";
+    opFileName = "../output/512edge.pgm";
     if (rank == ROOT) { write_to_file(resultArray, numRows, numCols, maxVal, opFileName); }
     
     set_array(valueArray, arrSize, inputArray);
@@ -82,7 +81,7 @@ int main(int argc, char** argv) {
             numRows, numCols, valueArray, sharpen,
             resultArray, matSize, sharpInstances 
         );
-    opFileName = "output/512sharpen.pgm";
+    opFileName = "../output/512sharpen.pgm";
     if (rank == ROOT) { write_to_file(resultArray, numRows, numCols, maxVal, opFileName); }
     
     set_array(valueArray, arrSize, inputArray);
@@ -91,7 +90,7 @@ int main(int argc, char** argv) {
             numRows, numCols, valueArray, gaussBlur,
             resultArray, matSize, blurInstances 
         );
-    opFileName = "output/512blur.pgm";
+    opFileName = "../output/512blur.pgm";
     if (rank == ROOT) { write_to_file(resultArray, numRows, numCols, maxVal, opFileName); }
     
     if (rank == ROOT) {
@@ -126,6 +125,9 @@ int main(int argc, char** argv) {
     delete[] inputArray;
     inputArray = nullptr;
 
+#ifdef WITH_OPTION
+    std::cout << "This worked.\n";
+#endif
 
     return 0;
 }
