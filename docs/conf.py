@@ -55,7 +55,7 @@ html_theme_options = {
 }
 
 breathe_projects = {
-	"Image convolution using MPI": "_build/xml/"
+	"Image convolution using MPI": "build/xml/"
 }
 breathe_default_project = "Image convolution using MPI"
 breathe_default_members = ('members', 'undoc-members')

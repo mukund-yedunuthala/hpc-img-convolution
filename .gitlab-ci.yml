@@ -3,26 +3,23 @@ image: alpine:latest
 variables:
   BRANCH_NAME: $CI_COMMIT_REF_NAME
 
-stages:
-  - build
-
 before_script:
   - apk add --no-cache doxygen
   - apk add --no-cache py3-pip
   - pip3 install sphinx-rtd-theme breathe sphinx-sitemap
 
-build:
-  stage: build
+pages:
   script:
     - apk add --no-cache git
     - git clone $CI_REPOSITORY_URL
     - cd hpc-img-convolution # Replace with the path to your repository
     - cd docs
     - make html
-    - cd _build/html
-    - touch .nojekyll
+    - touch build/html/.nojekyll
+    - mv build/html public/
+  environment: production
   artifacts:
     paths:
-      - docs/_build/html
-  only:
-    - master
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
