@@ -4,7 +4,7 @@
 *.out
 .vscode/
 data/
-docs/
+.python-version
 # latex 
 ## Core latex/pdflatex auxiliary files:
 *.aux
