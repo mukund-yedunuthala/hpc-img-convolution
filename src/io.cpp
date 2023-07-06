@@ -5,7 +5,7 @@
  * \date 15 March 2023
  */ 
 
-#include "io.h"
+#include "../include/io.h"
 
 void get_file_data(
     std::ifstream& inputFile, 

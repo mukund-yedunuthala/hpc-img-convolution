@@ -5,14 +5,13 @@
  * \date 15 March 2023
  */ 
 
-
-#include "helper.h"
+#include "../include/helper.h"
 void printinfo(
     unsigned int& numRows,
     unsigned int& numCols,
     unsigned short int& maxVal
 ) {
-    std::cout << "Image convolution using MPI\n";
+    std::cout << "Image convolution using MPI \n";
     std::cout << "High Performance Computing and Optimization";
     std::cout << " | WS2020-21\n";
     std::cout << "Technische Universität Bergakademie Freiberg\n";

@@ -4,7 +4,7 @@
 *.out
 .vscode/
 data/
-docs/
+.python-version
 # latex 
 ## Core latex/pdflatex auxiliary files:
 *.aux
@@ -290,3 +290,4 @@ TSWLatexianTemp*
 # option is specified. Footnotes are the stored in a file with suffix Notes.bib.
 # Uncomment the next line to have this generated file ignored.
 #*Notes.bib
+build/
