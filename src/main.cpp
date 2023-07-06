@@ -5,14 +5,14 @@
  * \date 15 March 2023
  */ 
 
-#include "io.h"
-#include "helper.h"
+#include "../include/io.h"
+#include "../include/helper.h"
 #include "HPC2020Config.h"
 #ifdef WITH_MPI
-    #include "mpi_convolutions.h"
+    #include "../include/mpi_convolutions.h"
 #else
     #include <time.h>
-    #include "convolutions.h"
+    #include "../include/convolutions.h"
 #endif
 /**
  * \brief Main function.

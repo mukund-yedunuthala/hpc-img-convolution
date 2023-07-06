@@ -5,7 +5,7 @@
  * \date 15 March 2023
  */ 
 
-#include "helper.h"
+#include "../include/helper.h"
 void printinfo(
     unsigned int& numRows,
     unsigned int& numCols,
