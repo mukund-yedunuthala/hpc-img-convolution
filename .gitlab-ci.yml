@@ -1,20 +1,28 @@
-# This file is a template, and might need editing before it works on your project.
-# To contribute improvements to CI/CD templates, please follow the Development guide at:
-# https://docs.gitlab.com/ee/development/cicd/templates.html
-# This specific template is located at:
-# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Pages/Doxygen.gitlab-ci.yml
+image: alpine:latest
 
-# Full project: https://gitlab.com/pages/doxygen
-image: alpine
+variables:
+  BRANCH_NAME: $CI_COMMIT_REF_NAME
 
-pages:
+stages:
+  - build
+
+before_script:
+  - apk add --no-cache doxygen
+  - apk add --no-cache py3-pip
+  - pip3 install sphinx-rtd-theme breathe sphinx-sitemap
+
+build:
+  stage: build
   script:
-    - apk update && apk add doxygen
-    - doxygen hpc_convolution.doxy
-    - mv docs/html/ public/
-  environment: production
+    - apk add --no-cache git
+    - git clone $CI_REPOSITORY_URL
+    - cd hpc-img-convolution # Replace with the path to your repository
+    - cd docs
+    - make html
+    - cd _build/html
+    - touch .nojekyll
   artifacts:
     paths:
-      - public
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      - docs/_build/html
+  only:
+    - master
