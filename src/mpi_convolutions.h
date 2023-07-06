@@ -30,10 +30,13 @@ void setup_convolution(
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     if(WORLD_SIZE == 1) {
-        convolution<kernel>(
-            valueArray, resultArray, convolutionKernel, 
-            rows, cols, size, instances
-        );
+        while (instances > 0) {        
+            convolution<kernel>(
+                valueArray, resultArray, convolutionKernel, 
+                rows, cols, size
+            );
+            instances--;
+        }
     }
 
     else {
@@ -53,81 +56,89 @@ void setup_convolution(
         int* convolutionBuffer{new int[convSize]{}};
         int* convolutionResult{new int[convSize]};
 
-        MPI_Scatter(
-            valueArray, bufferSize, MPI_INT, 
-            receiverBuffer, bufferSize, MPI_INT, 
-            ROOT, MPI_COMM_WORLD
-        );
+        while (instances > 0)
+        {
+            MPI_Scatter(
+                valueArray, bufferSize, MPI_INT, 
+                receiverBuffer, bufferSize, MPI_INT, 
+                ROOT, MPI_COMM_WORLD
+            );
 
-        for (size_t i = 0; i < cols; i++) {
-            senderHalo_1[i] = receiverBuffer[i];
-            senderHalo_2[i] = receiverBuffer[i + ((rowsToSend-1) * cols)];
-        }
-
-        if (WORLD_SIZE != 1) {
-            if (rank == 0) {
-                receiver_1 = WORLD_SIZE - 1;
-                receiver_2 = rank + 1;
-                sender_1 = WORLD_SIZE - 1;
-                sender_2 = rank + 1;
+            for (size_t i = 0; i < cols; i++) {
+                senderHalo_1[i] = receiverBuffer[i];
+                senderHalo_2[i] = receiverBuffer[i + ((rowsToSend-1) * cols)];
             }
-            else if (rank == (WORLD_SIZE - 1)) {
-                receiver_1 = rank - 1;
-                receiver_2 = 0;
-                sender_1 = rank - 1;
-                sender_2 = 0;
+
+            if (WORLD_SIZE != 1) {
+                if (rank == 0) {
+                    receiver_1 = WORLD_SIZE - 1;
+                    receiver_2 = rank + 1;
+                    sender_1 = WORLD_SIZE - 1;
+                    sender_2 = rank + 1;
+                }
+                else if (rank == (WORLD_SIZE - 1)) {
+                    receiver_1 = rank - 1;
+                    receiver_2 = 0;
+                    sender_1 = rank - 1;
+                    sender_2 = 0;
+                }
+                else {
+                    receiver_1 = rank - 1;
+                    receiver_2 = rank + 1;
+                    sender_1 = rank - 1;
+                    sender_2 = rank + 1;
+                }
             }
             else {
-                receiver_1 = rank - 1;
-                receiver_2 = rank + 1;
-                sender_1 = rank - 1;
-                sender_2 = rank + 1;
+                receiver_1 = ROOT;
+                receiver_2 = ROOT;
+                sender_1 = ROOT;
+                sender_2 = ROOT;
             }
-        }
 
-        MPI_Request requests[2]{};
-        MPI_Isend(
-            senderHalo_1, cols, MPI_INT,
-            receiver_1, 1, MPI_COMM_WORLD, &requests[0]
-        );
-        MPI_Isend(
-            senderHalo_2, cols, MPI_INT,
-            receiver_2, 2, MPI_COMM_WORLD, &requests[1]
-        );
-        MPI_Irecv(
-            receiverHalo_1, cols, MPI_INT,
-            sender_1, 2, MPI_COMM_WORLD, &requests[1]
-        );
-        MPI_Irecv(
-            receiverHalo_2, cols, MPI_INT,
-            sender_2, 1, MPI_COMM_WORLD, &requests[0]
-        );
-        MPI_Waitall(2, requests, MPI_STATUS_IGNORE);
-        for (size_t i = 0; i < convSize; i++)
-        {
-            if (i < cols) {
-               convolutionBuffer[i] = receiverHalo_1[i];
-               convolutionBuffer[bufferSize + cols + i] = receiverHalo_2[i];
+            MPI_Request requests[2]{};
+            MPI_Isend(
+                senderHalo_1, cols, MPI_INT,
+                receiver_1, 1, MPI_COMM_WORLD, &requests[0]
+            );
+            MPI_Isend(
+                senderHalo_2, cols, MPI_INT,
+                receiver_2, 2, MPI_COMM_WORLD, &requests[1]
+            );
+            MPI_Irecv(
+                receiverHalo_1, cols, MPI_INT,
+                sender_1, 2, MPI_COMM_WORLD, &requests[1]
+            );
+            MPI_Irecv(
+                receiverHalo_2, cols, MPI_INT,
+                sender_2, 1, MPI_COMM_WORLD, &requests[0]
+            );
+            MPI_Waitall(2, requests, MPI_STATUS_IGNORE);
+            for (size_t i = 0; i < convSize; i++) {
+                if (i < cols) {
+                   convolutionBuffer[i] = receiverHalo_1[i];
+                   convolutionBuffer[bufferSize + cols + i] = receiverHalo_2[i];
+                }
+                else if (i < (bufferSize + cols)) {
+                    convolutionBuffer[i] = receiverBuffer[i - cols];
+                }
             }
-            else if (i < (bufferSize + cols)) {
-                convolutionBuffer[i] = receiverBuffer[i - cols];
+
+            convolution<kernel>(
+                convolutionBuffer, convolutionResult, 
+                convolutionKernel, convRows, cols, size
+            );
+
+            for (size_t i = 0; i < bufferSize; i++) {
+                receiverBuffer[i] = convolutionResult[i+cols];
             }
+
+            MPI_Gather(
+                receiverBuffer, bufferSize, MPI_INT,
+                resultArray, bufferSize, MPI_INT, ROOT, MPI_COMM_WORLD
+            );
+            instances--;
         }
-
-        convolution<kernel>(
-            convolutionBuffer, convolutionResult, 
-            convolutionKernel, convRows, cols, size, instances
-        );
-
-        for (size_t i = 0; i < bufferSize; i++) {
-            receiverBuffer[i] = convolutionResult[i+cols];
-        }
-
-        MPI_Gather(
-            receiverBuffer, bufferSize, MPI_INT,
-            resultArray, bufferSize, MPI_INT, ROOT, MPI_COMM_WORLD
-        );
-
         delete[] receiverBuffer;
         receiverBuffer = nullptr;
         delete[] convolutionBuffer;

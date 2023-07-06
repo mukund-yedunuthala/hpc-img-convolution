@@ -85,10 +85,13 @@ int main(int argc, char** argv) {
         );
     if (rank == ROOT) { write_to_file(resultArray, numRows, numCols, maxVal, opFileName); }
 #else
-    convolution<int>(
-        valueArray, resultArray, edgeDetection, 
-        numRows, numCols, matSize, edgeInstances
-    );
+    while (edgeInstances > 0) {
+        convolution<int>(
+            valueArray, resultArray, edgeDetection, 
+            numRows, numCols, matSize
+        );
+        edgeInstances--;
+    }
     write_to_file(resultArray, numRows, numCols, maxVal, opFileName);
 #endif
     
@@ -102,10 +105,13 @@ int main(int argc, char** argv) {
         );
     if (rank == ROOT) { write_to_file(resultArray, numRows, numCols, maxVal, opFileName); }
 #else
-    convolution<int>(
-        valueArray, resultArray, sharpen, 
-        numRows, numCols, matSize, sharpInstances
-    );
+    while (sharpInstances > 0) {
+        convolution<int>(
+            valueArray, resultArray, sharpen, 
+            numRows, numCols, matSize
+        );
+        sharpInstances--;
+    }
     write_to_file(resultArray, numRows, numCols, maxVal, opFileName);
 #endif
 
@@ -119,10 +125,13 @@ int main(int argc, char** argv) {
         );
     if (rank == ROOT) { write_to_file(resultArray, numRows, numCols, maxVal, opFileName); }
 #else
-    convolution<double>(
-        valueArray, resultArray, gaussBlur, 
-        numRows, numCols, matSize, blurInstances
-    );
+    while (blurInstances > 0) {  
+        convolution<double>(
+            valueArray, resultArray, gaussBlur, 
+            numRows, numCols, matSize
+        );
+        blurInstances--;
+    }
     write_to_file(resultArray, numRows, numCols, maxVal, opFileName);
 #endif
     
