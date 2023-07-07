@@ -1,7 +1,0 @@
-var searchData=
-[
-  ['set_5farray_0',['set_array',['../helper_8h.html#aca6a184540d1d4f35a226e140ef0aefb',1,'set_array(int *&amp;array, unsigned long int &amp;size, int *&amp;inputArr):&#160;helper.cpp'],['../helper_8h.html#ad1303d4c71f6758b89eb078d8dd5f837',1,'set_array(int *&amp;array, unsigned long int &amp;size, int &amp;value):&#160;helper.cpp'],['../helper_8cpp.html#aca6a184540d1d4f35a226e140ef0aefb',1,'set_array(int *&amp;array, unsigned long int &amp;size, int *&amp;inputArr):&#160;helper.cpp'],['../helper_8cpp.html#ad1303d4c71f6758b89eb078d8dd5f837',1,'set_array(int *&amp;array, unsigned long int &amp;size, int &amp;value):&#160;helper.cpp']]],
-  ['set_5finput_1',['set_input',['../helper_8h.html#a686aeaf8434c15ec3bb04a5b861e0b05',1,'set_input(int *&amp;array, unsigned long int &amp;N, std::stringstream &amp;strStream):&#160;helper.cpp'],['../helper_8cpp.html#a686aeaf8434c15ec3bb04a5b861e0b05',1,'set_input(int *&amp;array, unsigned long int &amp;N, std::stringstream &amp;strStream):&#160;helper.cpp']]],
-  ['set_5fkernels_2',['set_kernels',['../helper_8h.html#a651f02e262d43804f0218b3680eacb23',1,'set_kernels(int **&amp;edgeDetection, int **&amp;identity, int **&amp;sharpen, double **&amp;gaussBlur):&#160;helper.cpp'],['../helper_8cpp.html#a651f02e262d43804f0218b3680eacb23',1,'set_kernels(int **&amp;edgeDetection, int **&amp;identity, int **&amp;sharpen, double **&amp;gaussBlur):&#160;helper.cpp']]],
-  ['setup_5fconvolution_3',['setup_convolution',['../mpi__convolutions_8h.html#a1cf2d97746a926551aade2ce2830140e',1,'mpi_convolutions.h']]]
-];
