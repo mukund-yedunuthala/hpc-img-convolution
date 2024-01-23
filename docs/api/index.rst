@@ -6,7 +6,8 @@ API
  .. toctree::
 
    main
-   convolutions
    helper
    io
+   kernels
+   seq_convolutions
    mpi_convolutions

@@ -37,6 +37,7 @@ highlight_language = 'c++'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'sphinx_rtd_theme'
+html_baseurl = 'https://mukund-yedunuthala.gitlab.io/hpc-img-convolution/'
 html_theme_options = {
     'canonical_url': '',
     'analytics_id': '',  #  Provided by Google in your dashboard

@@ -1,7 +1,7 @@
-.. _api_mpi_convolution:
+.. _api_mpi_convolutions:
 
-MPI convolution
-===============
+MPI convolutions
+================
 
 .. doxygenfile:: mpi_convolutions.h
     :project: Image convolution using MPI

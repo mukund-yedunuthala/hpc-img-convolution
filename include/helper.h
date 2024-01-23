@@ -98,10 +98,10 @@ void print_result(T *array, size_t rows, size_t cols) {
 */
 void print_time_info(double& time);
 
-
 /**
  * \brief Prints maximum value present in a 1-d array as used in this project. 
- * \param time Calculated wall time taken. 
+ * \param buffer The array
+ * \param bufferSize The size of the array
 */
-void printMaxValue(const int* const& buffer, int bufferSize); 
+void print_max_value(const int* const& buffer, int bufferSize); 
 #endif
