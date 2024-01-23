@@ -2,7 +2,7 @@
  * \file
  * \brief Definitions of helper functions
  * \author Venkata Mukund Kashyap Yedunuthala
- * \date 15 March 2023
+ * \date 23 January 2024
  */ 
 
 #include "../include/helper.h"
@@ -80,7 +80,7 @@ void print_time_info(double& time) {
         << time << "\n" << separator << "\n";
 }
 
-void printMaxValue(const int* const& buffer, int bufferSize) {
+void print_max_value(const int* const& buffer, int bufferSize) {
     if (!buffer || bufferSize <= 0) {
         std::cerr << "Invalid input" << std::endl;
         return;

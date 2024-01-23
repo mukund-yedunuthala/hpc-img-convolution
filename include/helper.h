@@ -2,7 +2,7 @@
  * \file
  * \brief Header file for helper functions
  * \author Venkata Mukund Kashyap Yedunuthala
- * \date 15 March 2023
+ * \date 23 January 2024
  */ 
 
 
@@ -99,5 +99,9 @@ void print_result(T *array, size_t rows, size_t cols) {
 void print_time_info(double& time);
 
 
+/**
+ * \brief Prints maximum value present in a 1-d array as used in this project. 
+ * \param time Calculated wall time taken. 
+*/
 void printMaxValue(const int* const& buffer, int bufferSize); 
 #endif

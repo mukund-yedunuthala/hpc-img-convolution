@@ -1,3 +1,10 @@
+/**
+ * \file
+ * \brief Main project file
+ * \author Venkata Mukund Kashyap Yedunuthala
+ * \date 23 January 2024
+ */ 
+
 #include "../include/io.h"
 #include "../include/helper.h"
 #include "../include/kernels.h"
@@ -9,6 +16,19 @@
     #include <time.h>
     #include "../include/seq_convolutions.h"
 #endif
+
+/**
+ * \brief Main function.
+ * 
+ * Reads a given input PGM file and performs convolution using given 
+ * kernels and writes output to indicated file. Outputs 1 file, one 
+ * for each convolution kernel. Defaults indicate that blur
+ * is performed 5 times, whereas the
+ * other two are limited to 1. Supports parallel processing
+ * using MPI. Input array is divided into chunks if more than 1 process
+ * exist in the swarm. File and terminal outputs occur on root process.
+*/
+
 
 int main(int argc, char** argv) {
 

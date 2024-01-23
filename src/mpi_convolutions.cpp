@@ -1,4 +1,13 @@
+/**
+ * \file
+ * \brief Convolutions using MPI, function definition.
+ * \author Venkata Mukund Kashyap Yedunuthala
+ * \date 23 January 2024
+ */ 
+
+
 #include "../include/mpi_convolutions.h"
+
 void setup_convolution_new(
     Kernels& kernels,
     unsigned int& rows,

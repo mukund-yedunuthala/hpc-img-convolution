@@ -1,3 +1,9 @@
+/**
+ * \file
+ * \brief Definitions for Kernels struct members.
+ * \author Venkata Mukund Kashyap Yedunuthala
+ * \date 23 January 2024
+ */ 
 #include "../include/kernels.h"
 
 Kernels::Kernels() : identity(nullptr), edgeDetection(nullptr),

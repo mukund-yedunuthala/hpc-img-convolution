@@ -1,3 +1,11 @@
+/**
+ * \file
+ * \brief Definition of sequential convolutions function.
+ * \author Venkata Mukund Kashyap Yedunuthala
+ * \date 23 January 2024
+ */ 
+
+
 #include "../include/seq_convolutions.h"
 
 void seq_convolution(
