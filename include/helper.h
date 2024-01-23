@@ -97,4 +97,7 @@ void print_result(T *array, size_t rows, size_t cols) {
  * \param time Calculated wall time taken. 
 */
 void print_time_info(double& time);
+
+
+void printMaxValue(const int* const& buffer, int bufferSize); 
 #endif

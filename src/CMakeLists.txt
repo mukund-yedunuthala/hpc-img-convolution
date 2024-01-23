@@ -1,2 +1,5 @@
 add_library(Helper helper.cpp)
 add_library(IO io.cpp)
+add_library(Kernels kernels.cpp)
+add_library(MPI_Convolutions mpi_convolutions.cpp)
+add_library(SEQ_Convolutions seq_convolutions.cpp)

@@ -1,58 +1,44 @@
-/**
- * \file
- * \brief Main project file
- * \author Venkata Mukund Kashyap Yedunuthala
- * \date 15 March 2023
- */ 
-
 #include "../include/io.h"
 #include "../include/helper.h"
+#include "../include/kernels.h"
+
 #include "HPC2020Config.h"
 #ifdef WITH_MPI
     #include "../include/mpi_convolutions.h"
 #else
     #include <time.h>
-    #include "../include/convolutions.h"
+    #include "../include/seq_convolutions.h"
 #endif
-/**
- * \brief Main function.
- * 
- * Reads a given input PGM file and performs convolution using given 
- * kernels and writes output to indicated file. Outputs 3 files, one 
- * for each convolution kernel. Blur is performed 5 times, whereas the
- * other two are limited to one instance. Supports parallel processing
- * using MPI. Input array is divided into chunks if more than 1 process
- * exist in the swarm. File and terminal outputs occur on root process.
-*/
+
 int main(int argc, char** argv) {
-    
+
+    // Initial values
     int rank{}, WORLD_SIZE{}, ROOT{0};
     unsigned int numRows{}, numCols{};
     unsigned short int maxVal{};
     unsigned short int matSize{3};
     unsigned short int blurInstances{5}, edgeInstances{1}, sharpInstances{1};
     std::string ipFileName{""}, opFileName{""};
-    ipFileName = "../inputs/512.pgm";
+    std::string ipFilePrefix{"512"};
+    ipFileName = "../inputs/" + ipFilePrefix + ".pgm";
 
+    // Read from file
     std::stringstream strStream;
     std::ifstream ipFile{ipFileName};
-
     get_file_data(ipFile, numRows, numCols, maxVal, strStream);
-    
+
+    // Set values related to file arrays
     unsigned long int arrSize{numCols * numRows};
     int defaultValue{};
-
+    
+    // Define file arrays
     int *inputArray {new int[arrSize]};
     int *valueArray {new int[arrSize]};
     int *resultArray {new int[arrSize]};
-
     set_input(inputArray, arrSize, strStream);
-    
-
     ipFile.close();
     
-    // setting kernels 
-
+    // Setting convolution kernels
     int **edgeDetection{new int*[matSize]};
     int **sharpen{new int*[matSize]};
     int **identity{new int*[matSize]};
@@ -63,8 +49,15 @@ int main(int argc, char** argv) {
         identity[i] = new int[matSize];
         gaussBlur[i] = new double[matSize];
     }
-    // std::cout << "Edge address (out): " << &edgeDetection << std::endl;
     set_kernels(edgeDetection, identity, sharpen, gaussBlur);
+    Kernels kernels;
+    kernels.setMatSize(matSize);
+    kernels.setInstances(edgeInstances, blurInstances, sharpInstances);
+    kernels.setIdentity(identity);
+    kernels.setEdgeDetection(edgeDetection);
+    kernels.setSharpen(sharpen);
+    kernels.setGBlur(gaussBlur);
+    // Convolution
 #ifdef WITH_MPI
     double wallTime{};
     MPI_Init(&argc, &argv);
@@ -74,67 +67,17 @@ int main(int argc, char** argv) {
 #else
     clock_t wallTime = clock();
 #endif
-
     set_array(valueArray, arrSize, inputArray);
     set_array(resultArray, arrSize, defaultValue);
-    opFileName = "../output/512edge.pgm";
+    opFileName = "../output/" + ipFilePrefix + ".pgm";
 #ifdef WITH_MPI
-    setup_convolution<int>(
-            numRows, numCols, valueArray, edgeDetection,
-            resultArray, matSize, edgeInstances 
-        );
+    setup_convolution_new(kernels, numRows, numCols, valueArray, resultArray);    
     if (rank == ROOT) { write_to_file(resultArray, numRows, numCols, maxVal, opFileName); }
 #else
-    while (edgeInstances > 0) {
-        convolution<int>(
-            valueArray, resultArray, edgeDetection, 
-            numRows, numCols, matSize
-        );
-        edgeInstances--;
-    }
-    write_to_file(resultArray, numRows, numCols, maxVal, opFileName);
-#endif
-    
-    set_array(valueArray, arrSize, inputArray);
-    set_array(resultArray, arrSize, defaultValue);
-    opFileName = "../output/512sharpen.pgm";
-#ifdef WITH_MPI
-    setup_convolution<int>(
-            numRows, numCols, valueArray, sharpen,
-            resultArray, matSize, sharpInstances 
-        );
-    if (rank == ROOT) { write_to_file(resultArray, numRows, numCols, maxVal, opFileName); }
-#else
-    while (sharpInstances > 0) {
-        convolution<int>(
-            valueArray, resultArray, sharpen, 
-            numRows, numCols, matSize
-        );
-        sharpInstances--;
-    }
+    seq_convolution(kernels, numRows, numCols, valueArray, resultArray);
     write_to_file(resultArray, numRows, numCols, maxVal, opFileName);
 #endif
 
-    set_array(valueArray, arrSize, inputArray);
-    set_array(resultArray, arrSize, defaultValue);
-    opFileName = "../output/512blur.pgm";
-#ifdef WITH_MPI
-    setup_convolution<double>(
-            numRows, numCols, valueArray, gaussBlur,
-            resultArray, matSize, blurInstances 
-        );
-    if (rank == ROOT) { write_to_file(resultArray, numRows, numCols, maxVal, opFileName); }
-#else
-    while (blurInstances > 0) {  
-        convolution<double>(
-            valueArray, resultArray, gaussBlur, 
-            numRows, numCols, matSize
-        );
-        blurInstances--;
-    }
-    write_to_file(resultArray, numRows, numCols, maxVal, opFileName);
-#endif
-    
 #ifdef WITH_MPI
     if (rank == ROOT) {
         printinfo(numRows, numCols, maxVal);
@@ -148,6 +91,8 @@ int main(int argc, char** argv) {
     double elapsed = (double) wallTime/CLOCKS_PER_SEC;
     print_time_info(elapsed);
 #endif
+
+    // Destroy convolution kernels
     for (size_t i = 0; i < matSize; i++){
         delete[] edgeDetection[i];
         delete[] identity[i];
@@ -158,18 +103,19 @@ int main(int argc, char** argv) {
         sharpen[i] = nullptr;
         gaussBlur[i] = nullptr;
     }
+    delete[] kernels.instancesArray;
     delete[] edgeDetection, identity, sharpen, gaussBlur;
     edgeDetection = nullptr;
     identity = nullptr;
     sharpen = nullptr;
     gaussBlur = nullptr;
-    
+    kernels.instancesArray = nullptr;
+
+    // Destroy file arrays
     delete[] valueArray;
     valueArray = nullptr;
     delete[] resultArray;
     resultArray = nullptr;
     delete[] inputArray;
     inputArray = nullptr;
-
-    return 0;
 }

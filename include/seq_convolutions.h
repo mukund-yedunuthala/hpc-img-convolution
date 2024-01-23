@@ -3,8 +3,11 @@
  * \brief Header file for convolutions
  * \author Venkata Mukund Kashyap Yedunuthala
  * \date 15 March 2023
- */ 
+ */
+#ifndef SEQ_CONVOLUTIONS_H
+#define SEQ_CONVOLUTIONS_H 
 #include <math.h>
+#include "kernels.h"
 /**
  * \brief Performs convolution parameter with a given kernel on a given array.
  * \param valueArray Input array.
@@ -44,3 +47,13 @@ void convolution(
         valueArray[i] = resultArray[i];
     }
 };
+
+void seq_convolution(
+    Kernels& kernels,
+    unsigned int& rows,
+    unsigned int& cols,
+    int*& valueArray,
+    int*& resultArray
+);
+
+#endif
