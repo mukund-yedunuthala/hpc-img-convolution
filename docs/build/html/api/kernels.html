@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kernels &mdash; Image convolution using MPI  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=eafc0fe6" />
+
+  
+    <link rel="canonical" href="https://mukund-yedunuthala.gitlab.io/hpc-img-convolution/api/kernels.html" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Sequential Convolution" href="seq_convolutions.html" />
+    <link rel="prev" title="I/O" href="io.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Image convolution using MPI
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Image convolution using MPI</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="main.html">Main File</a></li>
+<li class="toctree-l2"><a class="reference internal" href="helper.html">Helper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="io.html">I/O</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Kernels</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv47Kernels"><code class="docutils literal notranslate"><span class="pre">Kernels</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N7Kernels7KernelsEv"><code class="docutils literal notranslate"><span class="pre">Kernels::Kernels()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N7Kernels11setIdentityEPPi"><code class="docutils literal notranslate"><span class="pre">Kernels::setIdentity()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N7Kernels16setEdgeDetectionEPPi"><code class="docutils literal notranslate"><span class="pre">Kernels::setEdgeDetection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N7Kernels10setSharpenEPPi"><code class="docutils literal notranslate"><span class="pre">Kernels::setSharpen()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N7Kernels8setGBlurEPPd"><code class="docutils literal notranslate"><span class="pre">Kernels::setGBlur()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N7Kernels10setMatSizeEt"><code class="docutils literal notranslate"><span class="pre">Kernels::setMatSize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N7Kernels12setInstancesEttt"><code class="docutils literal notranslate"><span class="pre">Kernels::setInstances()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N7Kernels8identityE"><code class="docutils literal notranslate"><span class="pre">Kernels::identity</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N7Kernels13edgeDetectionE"><code class="docutils literal notranslate"><span class="pre">Kernels::edgeDetection</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N7Kernels7sharpenE"><code class="docutils literal notranslate"><span class="pre">Kernels::sharpen</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N7Kernels9gaussBlurE"><code class="docutils literal notranslate"><span class="pre">Kernels::gaussBlur</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N7Kernels14instancesArrayE"><code class="docutils literal notranslate"><span class="pre">Kernels::instancesArray</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N7Kernels7matSizeE"><code class="docutils literal notranslate"><span class="pre">Kernels::matSize</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="seq_convolutions.html">Sequential Convolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mpi_convolutions.html">MPI convolutions</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Image convolution using MPI</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">API</a></li>
+      <li class="breadcrumb-item active">Kernels</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/kernels.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="kernels">
+<span id="api-kernels"></span><h1>Kernels<a class="headerlink" href="#kernels" title="Link to this heading"></a></h1>
+<p>Header file defining <a class="reference internal" href="#structKernels"><span class="std std-ref">Kernels</span></a> struct. </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>Venkata Mukund Kashyap Yedunuthala </p>
+</dd>
+<dt><strong>Date</strong></dt><dd><p>23 January 2024 </p>
+</dd>
+</dl>
+</p>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv47Kernels">
+<span id="_CPPv37Kernels"></span><span id="_CPPv27Kernels"></span><span id="Kernels"></span><span class="target" id="structKernels"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Kernels</span></span></span><a class="headerlink" href="#_CPPv47Kernels" title="Link to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;kernels.h&gt;</em></div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7Kernels7KernelsEv">
+<span id="_CPPv3N7Kernels7KernelsEv"></span><span id="_CPPv2N7Kernels7KernelsEv"></span><span id="Kernels::Kernels"></span><span class="target" id="structKernels_1a5fee97e373096ba38ad5bfad470878e3"></span><span class="sig-name descname"><span class="n"><span class="pre">Kernels</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Kernels7KernelsEv" title="Link to this definition"></a><br /></dt>
+<dd><p>Default constructor for the <a class="reference internal" href="#structKernels"><span class="std std-ref">Kernels</span></a> struct. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7Kernels11setIdentityEPPi">
+<span id="_CPPv3N7Kernels11setIdentityEPPi"></span><span id="_CPPv2N7Kernels11setIdentityEPPi"></span><span id="Kernels::setIdentity__iPP"></span><span class="target" id="structKernels_1ad1b7dcf1ea435dc72d6395e7e5fe437b"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setIdentity</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">identityNew</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Kernels11setIdentityEPPi" title="Link to this definition"></a><br /></dt>
+<dd><p>Sets the identity kernel. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>identityNew</strong> – New identity kernel to set. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7Kernels16setEdgeDetectionEPPi">
+<span id="_CPPv3N7Kernels16setEdgeDetectionEPPi"></span><span id="_CPPv2N7Kernels16setEdgeDetectionEPPi"></span><span id="Kernels::setEdgeDetection__iPP"></span><span class="target" id="structKernels_1abc9764ea5c701b5b1ebbea3e40faee52"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setEdgeDetection</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">edgeDetectionNew</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Kernels16setEdgeDetectionEPPi" title="Link to this definition"></a><br /></dt>
+<dd><p>Sets the edge detection kernel. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>edgeDetectionNew</strong> – New edge detection kernel to set. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7Kernels10setSharpenEPPi">
+<span id="_CPPv3N7Kernels10setSharpenEPPi"></span><span id="_CPPv2N7Kernels10setSharpenEPPi"></span><span id="Kernels::setSharpen__iPP"></span><span class="target" id="structKernels_1ab7e6fdacc439d9e15b51dc870858faba"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setSharpen</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">sharpenNew</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Kernels10setSharpenEPPi" title="Link to this definition"></a><br /></dt>
+<dd><p>Sets the sharpening kernel. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sharpenNew</strong> – New sharpening kernel to set. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7Kernels8setGBlurEPPd">
+<span id="_CPPv3N7Kernels8setGBlurEPPd"></span><span id="_CPPv2N7Kernels8setGBlurEPPd"></span><span id="Kernels::setGBlur__doublePP"></span><span class="target" id="structKernels_1a4b35a9f005904bdf31b66e017bf8e1ce"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setGBlur</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">gaussBlurNew</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Kernels8setGBlurEPPd" title="Link to this definition"></a><br /></dt>
+<dd><p>Sets the Gaussian blur kernel. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gaussBlurNew</strong> – New Gaussian blur kernel to set. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7Kernels10setMatSizeEt">
+<span id="_CPPv3N7Kernels10setMatSizeEt"></span><span id="_CPPv2N7Kernels10setMatSizeEt"></span><span id="Kernels::setMatSize__unsigned-short"></span><span class="target" id="structKernels_1ac3e5239c845a40bd856bf49a5c0b54cf"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setMatSize</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">short</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">matSizeNew</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Kernels10setMatSizeEt" title="Link to this definition"></a><br /></dt>
+<dd><p>Sets the common size for all the kernels. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>matSizeNew</strong> – New common size for the kernels. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7Kernels12setInstancesEttt">
+<span id="_CPPv3N7Kernels12setInstancesEttt"></span><span id="_CPPv2N7Kernels12setInstancesEttt"></span><span id="Kernels::setInstances__unsigned-short.unsigned-short.unsigned-short"></span><span class="target" id="structKernels_1a67b932841a76a297e15ebcae19c64d90"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setInstances</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">short</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">edge</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">short</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">blur</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">short</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">sharp</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Kernels12setInstancesEttt" title="Link to this definition"></a><br /></dt>
+<dd><p>Sets the number of instances for each type of kernel. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>edge</strong> – Number of instances for edge detection kernel. </p></li>
+<li><p><strong>blur</strong> – Number of instances for Gaussian blur kernel. </p></li>
+<li><p><strong>sharp</strong> – Number of instances for sharpening kernel. </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7Kernels8identityE">
+<span id="_CPPv3N7Kernels8identityE"></span><span id="_CPPv2N7Kernels8identityE"></span><span id="Kernels::identity__iPP"></span><span class="target" id="structKernels_1a88e0046e328904f9ca067601f6e1c188"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">identity</span></span></span><a class="headerlink" href="#_CPPv4N7Kernels8identityE" title="Link to this definition"></a><br /></dt>
+<dd><p>2D array representing the identity kernel. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7Kernels13edgeDetectionE">
+<span id="_CPPv3N7Kernels13edgeDetectionE"></span><span id="_CPPv2N7Kernels13edgeDetectionE"></span><span id="Kernels::edgeDetection__iPP"></span><span class="target" id="structKernels_1ac0672b4010408b2c3f2af4c7fbe2b313"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">edgeDetection</span></span></span><a class="headerlink" href="#_CPPv4N7Kernels13edgeDetectionE" title="Link to this definition"></a><br /></dt>
+<dd><p>2D array representing the edge detection kernel. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7Kernels7sharpenE">
+<span id="_CPPv3N7Kernels7sharpenE"></span><span id="_CPPv2N7Kernels7sharpenE"></span><span id="Kernels::sharpen__iPP"></span><span class="target" id="structKernels_1a76e2fe655e0683f4c3955acc6ac22bc8"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">sharpen</span></span></span><a class="headerlink" href="#_CPPv4N7Kernels7sharpenE" title="Link to this definition"></a><br /></dt>
+<dd><p>2D array representing the sharpening kernel. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7Kernels9gaussBlurE">
+<span id="_CPPv3N7Kernels9gaussBlurE"></span><span id="_CPPv2N7Kernels9gaussBlurE"></span><span id="Kernels::gaussBlur__doublePP"></span><span class="target" id="structKernels_1ab5ca7a99b8ad363370612ba7135950ca"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">gaussBlur</span></span></span><a class="headerlink" href="#_CPPv4N7Kernels9gaussBlurE" title="Link to this definition"></a><br /></dt>
+<dd><p>2D array representing the Gaussian blur kernel. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7Kernels14instancesArrayE">
+<span id="_CPPv3N7Kernels14instancesArrayE"></span><span id="_CPPv2N7Kernels14instancesArrayE"></span><span id="Kernels::instancesArray__unsigned-shortP"></span><span class="target" id="structKernels_1a75ac4c292d56c735c4df0d049a2d9cbf"></span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">short</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">instancesArray</span></span></span><a class="headerlink" href="#_CPPv4N7Kernels14instancesArrayE" title="Link to this definition"></a><br /></dt>
+<dd><p>Array storing the number of instances for each type of kernel. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7Kernels7matSizeE">
+<span id="_CPPv3N7Kernels7matSizeE"></span><span id="_CPPv2N7Kernels7matSizeE"></span><span id="Kernels::matSize__unsigned-short"></span><span class="target" id="structKernels_1a8b1aa6dbabb033fbb1f211c73932c987"></span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">short</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">matSize</span></span></span><a class="headerlink" href="#_CPPv4N7Kernels7matSizeE" title="Link to this definition"></a><br /></dt>
+<dd><p>Common size for all the matrices (kernels). </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="io.html" class="btn btn-neutral float-left" title="I/O" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="seq_convolutions.html" class="btn btn-neutral float-right" title="Sequential Convolution" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Venkata Mukund Kashyap Yedunuthala.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
