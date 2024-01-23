@@ -5,6 +5,7 @@
 .vscode/
 data/
 .python-version
+venv/
 # latex 
 ## Core latex/pdflatex auxiliary files:
 *.aux
