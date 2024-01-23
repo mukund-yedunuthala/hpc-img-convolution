@@ -1,0 +1,17 @@
+var searchData=
+[
+  ['seq_5fconvolution_0',['seq_convolution',['../seq__convolutions_8h.html#af8283843ab20a196dc93dec49954a059',1,'seq_convolution(Kernels &amp;kernels, unsigned int &amp;rows, unsigned int &amp;cols, int *&amp;valueArray, int *&amp;resultArray):&#160;seq_convolutions.cpp'],['../seq__convolutions_8cpp.html#af8283843ab20a196dc93dec49954a059',1,'seq_convolution(Kernels &amp;kernels, unsigned int &amp;rows, unsigned int &amp;cols, int *&amp;valueArray, int *&amp;resultArray):&#160;seq_convolutions.cpp']]],
+  ['seq_5fconvolutions_2ecpp_1',['seq_convolutions.cpp',['../seq__convolutions_8cpp.html',1,'']]],
+  ['seq_5fconvolutions_2eh_2',['seq_convolutions.h',['../seq__convolutions_8h.html',1,'']]],
+  ['set_5farray_3',['set_array',['../helper_8h.html#aca6a184540d1d4f35a226e140ef0aefb',1,'set_array(int *&amp;array, unsigned long int &amp;size, int *&amp;inputArr):&#160;helper.cpp'],['../helper_8h.html#ad1303d4c71f6758b89eb078d8dd5f837',1,'set_array(int *&amp;array, unsigned long int &amp;size, int &amp;value):&#160;helper.cpp'],['../helper_8cpp.html#aca6a184540d1d4f35a226e140ef0aefb',1,'set_array(int *&amp;array, unsigned long int &amp;size, int *&amp;inputArr):&#160;helper.cpp'],['../helper_8cpp.html#ad1303d4c71f6758b89eb078d8dd5f837',1,'set_array(int *&amp;array, unsigned long int &amp;size, int &amp;value):&#160;helper.cpp']]],
+  ['set_5finput_4',['set_input',['../helper_8h.html#a686aeaf8434c15ec3bb04a5b861e0b05',1,'set_input(int *&amp;array, unsigned long int &amp;N, std::stringstream &amp;strStream):&#160;helper.cpp'],['../helper_8cpp.html#a686aeaf8434c15ec3bb04a5b861e0b05',1,'set_input(int *&amp;array, unsigned long int &amp;N, std::stringstream &amp;strStream):&#160;helper.cpp']]],
+  ['set_5fkernels_5',['set_kernels',['../helper_8h.html#a651f02e262d43804f0218b3680eacb23',1,'set_kernels(int **&amp;edgeDetection, int **&amp;identity, int **&amp;sharpen, double **&amp;gaussBlur):&#160;helper.cpp'],['../helper_8cpp.html#a651f02e262d43804f0218b3680eacb23',1,'set_kernels(int **&amp;edgeDetection, int **&amp;identity, int **&amp;sharpen, double **&amp;gaussBlur):&#160;helper.cpp']]],
+  ['setedgedetection_6',['setEdgeDetection',['../structKernels.html#abc9764ea5c701b5b1ebbea3e40faee52',1,'Kernels']]],
+  ['setgblur_7',['setGBlur',['../structKernels.html#a4b35a9f005904bdf31b66e017bf8e1ce',1,'Kernels']]],
+  ['setidentity_8',['setIdentity',['../structKernels.html#ad1b7dcf1ea435dc72d6395e7e5fe437b',1,'Kernels']]],
+  ['setinstances_9',['setInstances',['../structKernels.html#a67b932841a76a297e15ebcae19c64d90',1,'Kernels']]],
+  ['setmatsize_10',['setMatSize',['../structKernels.html#ac3e5239c845a40bd856bf49a5c0b54cf',1,'Kernels']]],
+  ['setsharpen_11',['setSharpen',['../structKernels.html#ab7e6fdacc439d9e15b51dc870858faba',1,'Kernels']]],
+  ['setup_5fconvolution_5fnew_12',['setup_convolution_new',['../mpi__convolutions_8h.html#a3d06ce19c6aa5cbdb24fcd176a2c0336',1,'setup_convolution_new(Kernels &amp;kernels, unsigned int &amp;rows, unsigned int &amp;cols, int *&amp;valueArray, int *&amp;resultArray):&#160;mpi_convolutions.cpp'],['../mpi__convolutions_8cpp.html#a3d06ce19c6aa5cbdb24fcd176a2c0336',1,'setup_convolution_new(Kernels &amp;kernels, unsigned int &amp;rows, unsigned int &amp;cols, int *&amp;valueArray, int *&amp;resultArray):&#160;mpi_convolutions.cpp']]],
+  ['sharpen_13',['sharpen',['../structKernels.html#a76e2fe655e0683f4c3955acc6ac22bc8',1,'Kernels']]]
+];

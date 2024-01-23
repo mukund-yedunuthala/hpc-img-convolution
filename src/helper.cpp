@@ -2,7 +2,7 @@
  * \file
  * \brief Definitions of helper functions
  * \author Venkata Mukund Kashyap Yedunuthala
- * \date 15 March 2023
+ * \date 23 January 2024
  */ 
 
 #include "../include/helper.h"
@@ -78,4 +78,21 @@ void print_time_info(double& time) {
     std::string separator(75,'-');
     std::cout << separator << "\n" << "Time taken: " \
         << time << "\n" << separator << "\n";
+}
+
+void print_max_value(const int* const& buffer, int bufferSize) {
+    if (!buffer || bufferSize <= 0) {
+        std::cerr << "Invalid input" << std::endl;
+        return;
+    }
+
+    int maxValue = buffer[0]; // Assume the first element as the initial maximum
+
+    for (int i = 1; i < bufferSize; ++i) {
+        if (buffer[i] > maxValue) {
+            maxValue = buffer[i];
+        }
+    }
+
+    std::cout << "Maximum value in the array: " << maxValue << std::endl;
 }
